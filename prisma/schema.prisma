@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  uid          String         @id @default(cuid())
+  username     String         @unique @db.String(100)
+  email        String         @unique
+  password     String
+  role         role           @default(USER)
+  sessions     sessions[]
+  transactions transactions[]
+  created_at   DateTime?      @default(now())
+}
+
+model sessions {
+  uid        String    @id @default(cuid())
+  session_id String    @db.String(500)
+  users      user?     @relation(fields: [user_id], references: [uid])
+  user_id    String?   @db.String(40)
+  created_at DateTime? @default(now())
+}
+
+model transactions {
+  uid         String          @id @default(cuid())
+  user        user?           @relation(fields: [user_id], references: [uid])
+  user_id     String?
+  categories  categories?     @relation(fields: [category_id], references: [uid])
+  category_id String?
+  amount      String          @db.String(11)
+  type        transactionType
+  created_at  DateTime?       @default(now())
+}
+
+model categories {
+  uid          String         @id @default(cuid())
+  transactions transactions[]
+  category     String
+  created_at   DateTime?      @default(now())
+}
+
+enum role {
+  USER
+  ADMIN
+}
+
+enum transactionType {
+  EXPENSES
+  REVENUE
+}
