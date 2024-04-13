@@ -14,22 +14,23 @@ datasource db {
 }
 
 model user {
-  uid          String         @id @default(cuid())
-  username     String         @unique @db.String(100)
-  email        String         @unique
-  password     String
-  role         role           @default(USER)
-  sessions     sessions[]
-  transactions transactions[]
-  created_at   DateTime?      @default(now())
+  uid           String         @id @default(cuid())
+  username      String         @unique @db.String(100)
+  email         String         @unique
+  emailVerified DateTime?
+  password      String
+  role          role           @default(USER)
+  sessions      sessions[]
+  transactions  transactions[]
+  created_at    DateTime       @default(now())
 }
 
 model sessions {
-  uid        String    @id @default(cuid())
-  session_id String    @db.String(500)
-  users      user?     @relation(fields: [user_id], references: [uid])
-  user_id    String?   @db.String(40)
-  created_at DateTime? @default(now())
+  uid        String   @id @default(cuid())
+  session_id String   @db.String(500)
+  users      user?    @relation(fields: [user_id], references: [uid])
+  user_id    String?  @db.String(40)
+  created_at DateTime @default(now())
 }
 
 model transactions {
@@ -40,14 +41,14 @@ model transactions {
   category_id String?
   amount      String          @db.String(11)
   type        transactionType
-  created_at  DateTime?       @default(now())
+  created_at  DateTime        @default(now())
 }
 
 model categories {
   uid          String         @id @default(cuid())
   transactions transactions[]
   category     String
-  created_at   DateTime?      @default(now())
+  created_at   DateTime       @default(now())
 }
 
 enum role {
