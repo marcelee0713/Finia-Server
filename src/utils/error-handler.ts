@@ -15,7 +15,5 @@ export const handleError = (err: Error): errorObject => {
     return errObj;
   }
 
-  errObj.message = "Internal server error";
-  errObj.status = 500;
   return errObj;
 };

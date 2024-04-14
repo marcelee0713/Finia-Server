@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AnyZodObject, z } from "zod";
 
-export const validateUserCreateBody =
-  (schema: AnyZodObject) =>
-  async (req: Request, res: Response, next: NextFunction) => {
+export const validateBody =
+  (schema: AnyZodObject) => async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema.parseAsync({
         body: req.body,

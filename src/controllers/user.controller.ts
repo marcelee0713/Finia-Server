@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
 import { IUserServiceInteractor } from "../interfaces/user.interface";
 import { handleError } from "../utils/error-handler";
+import { inject, injectable } from "inversify";
+import { INTERFACE_TYPE } from "../utils";
 
+@injectable()
 export class UserController {
   private interactor: IUserServiceInteractor;
 
-  constructor(interactor: IUserServiceInteractor) {
+  constructor(@inject(INTERFACE_TYPE.UserService) interactor: IUserServiceInteractor) {
     this.interactor = interactor;
   }
 

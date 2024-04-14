@@ -1,9 +1,7 @@
-import { User } from "../models/user.model";
-
 export interface IUserServiceInteractor {
-  createUser(username: string, email: string, password: string): Promise<User>;
+  createUser(username: string, email: string, password: string): Promise<void>;
 }
 
 export interface IUserRepository {
-  create(username: string, email: string, password: string): Promise<User>;
+  create(username: string, email: string, password: string): Promise<void>;
 }
