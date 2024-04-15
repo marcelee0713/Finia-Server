@@ -31,4 +31,30 @@ export class UserController {
       return res.status(500).json({ error: "Internal server error." });
     }
   }
+
+  async onLogin(req: Request, res: Response) {
+    try {
+      const username = req.body.username;
+      const password = req.body.password;
+
+      const accessToken = await this.interactor.logInUser(username, password);
+
+      return res
+        .cookie("token", accessToken, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 600000,
+        })
+        .status(200)
+        .json({ token: accessToken });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
 }

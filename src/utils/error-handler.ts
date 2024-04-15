@@ -9,11 +9,28 @@ export const handleError = (err: Error): errorObject => {
     status: 500,
   };
 
-  if (err.message === "user-already-exist") {
-    errObj.message = "User already exist!";
-    errObj.status = 409;
-    return errObj;
-  }
+  switch (err.message) {
+    case "user-already-exist":
+      errObj.message = "User already exist!";
+      errObj.status = 409;
+      return errObj;
 
-  return errObj;
+    case "user-does-not-exist":
+      errObj.message = "User does not exist!";
+      errObj.status = 404;
+      return errObj;
+
+    case "wrong-credentials":
+      errObj.message = "Username or password is invalid!";
+      errObj.status = 401;
+      return errObj;
+
+    case "not-authorized":
+      errObj.message = "Unauthorized";
+      errObj.status = 401;
+      return errObj;
+
+    default:
+      return errObj;
+  }
 };

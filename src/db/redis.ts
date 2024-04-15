@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-type RedisClientType = ReturnType<typeof createClient>;
+export type RedisClientType = ReturnType<typeof createClient>;
 
 export async function redisClient(): Promise<RedisClientType> {
   const redis: RedisClientType = createClient({
