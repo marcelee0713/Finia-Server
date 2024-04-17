@@ -7,6 +7,7 @@ export type jwtParams = {
 export type payloadType = {
   uid: string;
   setId: string;
+  expired?: boolean;
 };
 
 export type payloadParams = {

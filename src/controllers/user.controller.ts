@@ -43,7 +43,7 @@ export class UserController {
         .cookie("token", accessToken, {
           httpOnly: true,
           secure: true,
-          maxAge: 600000,
+          maxAge: 2592000000,
         })
         .status(200)
         .json({ token: accessToken });

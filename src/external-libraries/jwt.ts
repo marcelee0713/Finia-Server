@@ -11,6 +11,7 @@ export class JWTServices implements IJWTService {
   constructor() {
     this.jwtClient = jwt;
   }
+
   getPayload({ token, tokenType }: payloadParams): payloadType {
     const secret =
       tokenType === "REFRESH"
@@ -26,7 +27,12 @@ export class JWTServices implements IJWTService {
 
       const payload = this.jwtClient.decode(token) as payloadType;
 
-      return payload;
+      const expiredPayload: payloadType = {
+        ...payload,
+        expired: true,
+      };
+
+      return expiredPayload;
     }
   }
 

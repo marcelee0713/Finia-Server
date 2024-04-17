@@ -69,4 +69,48 @@ export class UserRepository implements IUserRepository {
       await redis.disconnect();
     }
   }
+
+  async checkSession(uid: string, setId: string): Promise<string> {
+    const redis: RedisClientType = await redisClient();
+
+    try {
+      const key = `${uid}:sessions`;
+
+      const keyExistence = await redis.KEYS(`${key}*`);
+
+      if (keyExistence.length === 0) throw new Error("not-authorized");
+
+      const sessionKey = keyExistence[0];
+
+      const todayTimestamp = Math.floor(Date.now() / 1000);
+
+      // Clear out the expired sessions
+      await redis.ZREMRANGEBYSCORE(sessionKey, "-inf", todayTimestamp);
+
+      const sessions = await redis.ZRANGE(sessionKey, 0, -1);
+
+      let isNotOnTheList = false;
+      let refreshToken = "";
+
+      for (let i = 0; i < sessions.length; i++) {
+        if (sessions[i].includes(setId)) {
+          isNotOnTheList = false;
+          const parts = sessions[i].split(":");
+          refreshToken = parts[1];
+          break;
+        }
+
+        isNotOnTheList = true;
+      }
+
+      if (isNotOnTheList) throw new Error("not-authorized");
+
+      return refreshToken;
+    } catch (err) {
+      if (err instanceof Error) throw new Error(err.message);
+      throw new Error("Internal server error");
+    } finally {
+      await redis.disconnect();
+    }
+  }
 }
