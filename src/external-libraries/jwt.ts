@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { TOKENS_LIFESPAN } from "../utils";
-import { jwtParams, payloadParams, payloadType } from "../types/jwt.types";
+import { emailPayloadType, jwtParams, payloadParams, payloadType } from "../types/jwt.types";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { injectable } from "inversify";
 
@@ -12,18 +12,25 @@ export class JWTServices implements IJWTService {
     this.jwtClient = jwt;
   }
 
-  getPayload({ token, tokenType }: payloadParams): payloadType {
+  getPayload({ token, tokenType }: payloadParams): payloadType | emailPayloadType {
     const secret =
       tokenType === "REFRESH"
         ? (process.env.REFRESH_TOKEN_SECRETKEY as string)
         : (process.env.ACCESS_TOKEN_SECRETKEY as string);
 
+    const emailSecret = `${process.env.REFRESH_TOKEN_SECRETKEY as string}${process.env.ACCESS_TOKEN_SECRETKEY as string}`;
+
     try {
-      const payload = this.jwtClient.verify(token, secret) as payloadType;
+      const payload =
+        tokenType === "EMAIL"
+          ? (this.jwtClient.verify(token, emailSecret) as emailPayloadType)
+          : (this.jwtClient.verify(token, secret) as payloadType);
 
       return payload;
     } catch (err) {
       if (tokenType === "REFRESH") throw new Error("not-authorized");
+
+      if (tokenType === "EMAIL") throw new Error("invalid-email-verification");
 
       const payload = this.jwtClient.decode(token) as payloadType;
 
@@ -36,16 +43,23 @@ export class JWTServices implements IJWTService {
     }
   }
 
-  createToken({ uid, setId, tokenType }: jwtParams): string {
+  createToken({ uid, setId, tokenType, email }: jwtParams): string {
     const secret =
       tokenType === "REFRESH"
         ? (process.env.REFRESH_TOKEN_SECRETKEY as string)
         : (process.env.ACCESS_TOKEN_SECRETKEY as string);
 
-    const token = this.jwtClient.sign({ uid: uid, setId: setId }, secret, {
-      expiresIn:
-        tokenType === "REFRESH" ? TOKENS_LIFESPAN.RefreshToken : TOKENS_LIFESPAN.AccessToken,
-    });
+    const emailSecret = `${process.env.REFRESH_TOKEN_SECRETKEY as string}${process.env.ACCESS_TOKEN_SECRETKEY as string}`;
+
+    const token =
+      tokenType === "EMAIL"
+        ? this.jwtClient.sign({ uid: uid, email: email }, emailSecret, {
+            expiresIn: TOKENS_LIFESPAN.EmailToken,
+          })
+        : this.jwtClient.sign({ uid: uid, setId: setId }, secret, {
+            expiresIn:
+              tokenType === "REFRESH" ? TOKENS_LIFESPAN.RefreshToken : TOKENS_LIFESPAN.AccessToken,
+          });
 
     return token;
   }

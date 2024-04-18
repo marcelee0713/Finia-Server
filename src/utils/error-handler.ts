@@ -30,6 +30,22 @@ export const handleError = (err: Error): errorObject => {
       errObj.status = 401;
       return errObj;
 
+    case "email-service-error":
+      errObj.message =
+        "User created successfully, but there was an error sending the confirmation email. Please try again later or contact support for assistance.";
+      errObj.status = 503;
+      return errObj;
+
+    case "invalid-email-verification":
+      errObj.message = "Email verification is no longer valid!";
+      errObj.status = 400;
+      return errObj;
+
+    case "unverified-email":
+      errObj.message = "Email is not verified!";
+      errObj.status = 403;
+      return errObj;
+
     default:
       return errObj;
   }

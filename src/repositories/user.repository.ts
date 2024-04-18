@@ -13,15 +13,17 @@ export class UserRepository implements IUserRepository {
     this.prismaClient = db;
   }
 
-  async create(username: string, email: string, password: string): Promise<void> {
+  async create(username: string, email: string, password: string): Promise<string> {
     try {
-      await this.prismaClient.user.create({
+      const user = await this.prismaClient.user.create({
         data: {
           email: email,
           username: username,
           password: await bcrypt.hash(password, 10),
         },
       });
+
+      return user.uid;
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2002") {
@@ -45,6 +47,8 @@ export class UserRepository implements IUserRepository {
     const isMatch = await bcrypt.compare(password, res.password);
 
     if (!isMatch) throw new Error("wrong-credentials");
+
+    if (!res.emailVerified) throw new Error("unverified-email");
 
     return res.uid;
   }

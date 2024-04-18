@@ -17,8 +17,9 @@ export class UserService implements IUserServiceInteractor {
     this.repository = repository;
   }
 
-  async createUser(username: string, email: string, password: string): Promise<void> {
-    return await this.repository.create(username, email, password);
+  async createUser(username: string, email: string, password: string): Promise<string> {
+    const uid = await this.repository.create(username, email, password);
+    return uid;
   }
 
   async logInUser(username: string, password: string): Promise<string> {

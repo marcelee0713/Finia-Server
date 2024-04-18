@@ -1,7 +1,8 @@
 export type jwtParams = {
-  tokenType: "REFRESH" | "ACCESS";
+  tokenType?: "REFRESH" | "ACCESS" | "EMAIL";
   uid: string;
-  setId: string;
+  setId?: string;
+  email?: string;
 };
 
 export type payloadType = {
@@ -10,7 +11,12 @@ export type payloadType = {
   expired?: boolean;
 };
 
+export type emailPayloadType = {
+  uid: string;
+  email: string;
+};
+
 export type payloadParams = {
   token: string;
-  tokenType: "REFRESH" | "ACCESS";
+  tokenType: "REFRESH" | "ACCESS" | "EMAIL";
 };

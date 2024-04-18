@@ -10,14 +10,16 @@ import { IJWTService } from "../interfaces/jwt.interface";
 import { JWTServices } from "../external-libraries/jwt";
 import { validateBody } from "../middlewares/req.middleware";
 import { UserMiddlewares } from "../middlewares/user.middleware";
+import { IEmailService } from "../interfaces/nodemailer.interface";
+import { EmailServices } from "../external-libraries/nodemailer";
 
 export const container = new Container();
 container.bind<IUserRepository>(INTERFACE_TYPE.UserRepository).to(UserRepository);
 container.bind<IUserServiceInteractor>(INTERFACE_TYPE.UserService).to(UserService);
-container.bind<IJWTService>(INTERFACE_TYPE.JWTServices).to(JWTServices);
 container.bind(INTERFACE_TYPE.UserController).to(UserController);
-
 container.bind(INTERFACE_TYPE.UserMiddlewares).to(UserMiddlewares);
+container.bind<IJWTService>(INTERFACE_TYPE.JWTServices).to(JWTServices);
+container.bind<IEmailService>(INTERFACE_TYPE.EmailServices).to(EmailServices);
 
 const userRouter = express.Router();
 

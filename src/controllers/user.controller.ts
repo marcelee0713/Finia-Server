@@ -3,13 +3,19 @@ import { IUserServiceInteractor } from "../interfaces/user.interface";
 import { handleError } from "../utils/error-handler";
 import { inject, injectable } from "inversify";
 import { INTERFACE_TYPE } from "../utils";
+import { IEmailService } from "../interfaces/nodemailer.interface";
 
 @injectable()
 export class UserController {
   private interactor: IUserServiceInteractor;
+  private emailService: IEmailService;
 
-  constructor(@inject(INTERFACE_TYPE.UserService) interactor: IUserServiceInteractor) {
+  constructor(
+    @inject(INTERFACE_TYPE.UserService) interactor: IUserServiceInteractor,
+    @inject(INTERFACE_TYPE.EmailServices) emailService: IEmailService
+  ) {
     this.interactor = interactor;
+    this.emailService = emailService;
   }
 
   async onCreateUser(req: Request, res: Response) {
@@ -18,9 +24,11 @@ export class UserController {
       const email = req.body.email;
       const password = req.body.password;
 
-      const data = await this.interactor.createUser(username, email, password);
+      const uid = await this.interactor.createUser(username, email, password);
 
-      return res.status(200).json(data);
+      await this.emailService.sendEmail(uid, email);
+
+      return res.status(200).json(uid);
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err);
