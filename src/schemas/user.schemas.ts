@@ -14,3 +14,10 @@ export const loginSchema = z.object({
     password: z.string().min(8),
   }),
 });
+
+export const verifyEmailSchema = z.object({
+  body: z.object({
+    uid: z.string(),
+    email: z.string().email().trim(),
+  }),
+});

@@ -65,4 +65,23 @@ export class UserController {
       return res.status(500).json({ error: "Internal server error." });
     }
   }
+
+  async onVerifyEmail(req: Request, res: Response) {
+    try {
+      const uid = req.body.uid;
+      const email = req.body.email;
+
+      await this.interactor.verifyEmailAddress(uid, email);
+
+      return res.status(200).json({ res: "Successfully verified your email address!" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      console.log(err);
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
 }

@@ -117,4 +117,36 @@ export class UserRepository implements IUserRepository {
       await redis.disconnect();
     }
   }
+
+  async verifyEmail(uid: string, email: string): Promise<void> {
+    try {
+      const user = await this.prismaClient.user.findFirst({
+        where: {
+          uid: uid,
+        },
+      });
+
+      if (!user) throw new Error("user-does-not-exist");
+
+      if (user.email !== email) throw new Error("email-dev-error");
+
+      await this.prismaClient.user.update({
+        where: {
+          uid: user.uid,
+          email: user.email,
+        },
+        data: {
+          emailVerified: new Date().toISOString(),
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        console.log(err.message);
+      }
+
+      if (err instanceof Error) throw new Error(err.message);
+
+      throw new Error("Internal server error");
+    }
+  }
 }

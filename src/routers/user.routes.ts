@@ -5,7 +5,7 @@ import { INTERFACE_TYPE } from "../utils";
 import { UserRepository } from "../repositories/user.repository";
 import { UserService } from "../services/user.services";
 import { UserController } from "../controllers/user.controller";
-import { createSchema, loginSchema } from "../schemas/user.schemas";
+import { createSchema, loginSchema, verifyEmailSchema } from "../schemas/user.schemas";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { JWTServices } from "../external-libraries/jwt";
 import { validateBody } from "../middlewares/req.middleware";
@@ -29,6 +29,12 @@ const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares
 userRouter.post("/create", validateBody(createSchema), controller.onCreateUser.bind(controller));
 
 userRouter.post("/login", validateBody(loginSchema), controller.onLogin.bind(controller));
+
+userRouter.post(
+  "/verify-email",
+  validateBody(verifyEmailSchema),
+  controller.onVerifyEmail.bind(controller)
+);
 
 userRouter.post("/middlewareTest", (req, res, next) => middleware.handleReq(req, res, next));
 

@@ -46,6 +46,11 @@ export const handleError = (err: Error): errorObject => {
       errObj.status = 403;
       return errObj;
 
+    case "email-dev-error":
+      errObj.message =
+        "Seems like the email your provided does not match on your email in the database. Immediately contact support for assistance. ";
+      errObj.status = 503;
+      return errObj;
     default:
       return errObj;
   }
