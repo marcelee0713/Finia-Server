@@ -118,8 +118,10 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async verifyEmail(uid: string, email: string): Promise<void> {
+  async verifyEmail(uid: string, email: string, emailFromReq: string): Promise<void> {
     try {
+      if (email !== emailFromReq) throw new Error("email-dev-req-error");
+
       const user = await this.prismaClient.user.findFirst({
         where: {
           uid: uid,
@@ -128,7 +130,9 @@ export class UserRepository implements IUserRepository {
 
       if (!user) throw new Error("user-does-not-exist");
 
-      if (user.email !== email) throw new Error("email-dev-error");
+      if (user.emailVerified) throw new Error("user-already-verified");
+
+      if (user.email !== emailFromReq) throw new Error("email-dev-error");
 
       await this.prismaClient.user.update({
         where: {
@@ -140,13 +144,57 @@ export class UserRepository implements IUserRepository {
         },
       });
     } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        console.log(err.message);
-      }
-
       if (err instanceof Error) throw new Error(err.message);
 
       throw new Error("Internal server error");
+    }
+  }
+
+  async addTokenToBlacklist(uid: string, token: string): Promise<void> {
+    const redis: RedisClientType = await redisClient();
+
+    try {
+      const key = `${uid}:blacklisted_tokens`;
+
+      const todayTimestamp = Math.floor(Date.now() / 1000);
+
+      await redis.ZADD(key, [{ score: todayTimestamp, value: token }]);
+    } catch (err) {
+      throw new Error("Internal server error");
+    } finally {
+      await redis.disconnect();
+    }
+  }
+
+  async checkTokenInBlacklist(uid: string, token: string): Promise<boolean> {
+    const redis: RedisClientType = await redisClient();
+
+    try {
+      const key = `${uid}:blacklisted_tokens`;
+
+      const todayTimestamp = Math.floor(Date.now() / 1000);
+
+      // Clear out the expired blacklisted tokkens
+      await redis.ZREMRANGEBYSCORE(key, "-inf", todayTimestamp);
+
+      const blacklistedTokens = await redis.ZRANGE(key, 0, -1);
+
+      let isBlacklisted = false;
+
+      for (let i = 0; i < blacklistedTokens.length; i++) {
+        if (blacklistedTokens[i] === token) {
+          isBlacklisted = true;
+          break;
+        }
+
+        isBlacklisted = false;
+      }
+
+      return isBlacklisted;
+    } catch (err) {
+      throw new Error("Internal server error");
+    } finally {
+      await redis.disconnect();
     }
   }
 }

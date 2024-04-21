@@ -70,8 +70,9 @@ export class UserController {
     try {
       const uid = req.body.uid;
       const email = req.body.email;
+      const token = req.body.token;
 
-      await this.interactor.verifyEmailAddress(uid, email);
+      await this.interactor.verifyEmailAddress(uid, email, token);
 
       return res.status(200).json({ res: "Successfully verified your email address!" });
     } catch (err) {

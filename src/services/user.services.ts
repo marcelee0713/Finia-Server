@@ -3,6 +3,7 @@ import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.inte
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
+import { emailPayloadType } from "../types/jwt.types";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
@@ -16,8 +17,32 @@ export class UserService implements IUserServiceInteractor {
     this.auth = auth;
     this.repository = repository;
   }
-  async verifyEmailAddress(uid: string, email: string): Promise<void> {
-    await this.repository.verifyEmail(uid, email);
+
+  async verifyEmailAddress(uid: string, email: string, token: string): Promise<void> {
+    try {
+      const payload = this.auth.getPayload({
+        token: token,
+        tokenType: "EMAIL",
+      }) as emailPayloadType;
+
+      const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(uid, token);
+
+      if (isTokenBlacklisted) throw new Error("blacklisted-token");
+
+      await this.repository.verifyEmail(payload.uid, payload.email, email);
+
+      console.log("Verified");
+
+      await this.repository.addTokenToBlacklist(uid, token);
+
+      console.log("Added to the blacklist tokens");
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
   }
 
   async createUser(username: string, email: string, password: string): Promise<string> {
