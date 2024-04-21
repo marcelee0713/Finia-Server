@@ -5,7 +5,13 @@ import { INTERFACE_TYPE } from "../utils";
 import { UserRepository } from "../repositories/user.repository";
 import { UserService } from "../services/user.services";
 import { UserController } from "../controllers/user.controller";
-import { createSchema, loginSchema, verifyEmailSchema } from "../schemas/user.schemas";
+import {
+  createSchema,
+  loginSchema,
+  passwordResetReqSchema,
+  passwordResetSchema,
+  verifyEmailSchema,
+} from "../schemas/user.schemas";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { JWTServices } from "../external-libraries/jwt";
 import { validateBody } from "../middlewares/req.middleware";
@@ -34,6 +40,18 @@ userRouter.post(
   "/verify-email",
   validateBody(verifyEmailSchema),
   controller.onVerifyEmail.bind(controller)
+);
+
+userRouter.patch(
+  "/reset-password",
+  validateBody(passwordResetSchema),
+  controller.onPasswordReset.bind(controller)
+);
+
+userRouter.post(
+  "/req-reset-password",
+  validateBody(passwordResetReqSchema),
+  controller.onPasswordResetReq.bind(controller)
 );
 
 userRouter.post("/middlewareTest", (req, res, next) => middleware.handleReq(req, res, next));

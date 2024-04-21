@@ -10,11 +10,17 @@ export const INTERFACE_TYPE = {
 export const TOKENS_LIFESPAN = {
   RefreshToken: "30d",
   AccessToken: "10m",
-  EmailToken: "1d",
+  EmailAndResetPassToken: "1d",
 };
 
 export const DEFAULT_EMAIL_CONTENT = {
   Name: "Finia",
   Subject: "Finia Email Verification",
   Text: "An email verification for Finia!",
+};
+
+export const DEFAULT_RESET_PASS_CONTENT = {
+  Name: "Finia",
+  Subject: "Finia Reset Password",
+  Text: "A request for resetting your password in Finia!",
 };

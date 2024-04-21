@@ -42,13 +42,25 @@ export class UserRepository implements IUserRepository {
       },
     });
 
-    if (res == null) throw new Error("user-does-not-exist");
+    if (res === null) throw new Error("user-does-not-exist");
 
     const isMatch = await bcrypt.compare(password, res.password);
 
     if (!isMatch) throw new Error("wrong-credentials");
 
     if (!res.emailVerified) throw new Error("unverified-email");
+
+    return res.uid;
+  }
+
+  async getUidByEmail(email: string): Promise<string> {
+    const res = await this.prismaClient.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (res === null) throw new Error("user-does-not-exist");
 
     return res.uid;
   }
@@ -156,9 +168,9 @@ export class UserRepository implements IUserRepository {
     try {
       const key = `${uid}:blacklisted_tokens`;
 
-      const todayTimestamp = Math.floor(Date.now() / 1000);
+      const thirtyDaysFutureTimestamp = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 
-      await redis.ZADD(key, [{ score: todayTimestamp, value: token }]);
+      await redis.ZADD(key, [{ score: thirtyDaysFutureTimestamp, value: token }]);
     } catch (err) {
       throw new Error("Internal server error");
     } finally {
@@ -195,6 +207,34 @@ export class UserRepository implements IUserRepository {
       throw new Error("Internal server error");
     } finally {
       await redis.disconnect();
+    }
+  }
+
+  async changePassword(uid: string, newPassword: string): Promise<void> {
+    try {
+      const user = await this.prismaClient.user.findFirst({
+        where: {
+          uid: uid,
+        },
+      });
+
+      if (!user) throw new Error("user-does-not-exist");
+
+      const isTheSame = await bcrypt.compare(newPassword, user.password);
+
+      if (isTheSame) throw new Error("same-password-reset-request");
+
+      await this.prismaClient.user.update({
+        where: {
+          uid: uid,
+        },
+        data: {
+          password: await bcrypt.hash(newPassword, 10),
+        },
+      });
+    } catch (err) {
+      if (err instanceof Error) throw new Error(err.message);
+      throw new Error("Internal server error");
     }
   }
 }

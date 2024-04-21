@@ -3,7 +3,7 @@ import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.inte
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
-import { emailPayloadType } from "../types/jwt.types";
+import { emailAndResetPayloadType } from "../types/jwt.types";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
@@ -23,7 +23,7 @@ export class UserService implements IUserServiceInteractor {
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "EMAIL",
-      }) as emailPayloadType;
+      }) as emailAndResetPayloadType;
 
       const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(uid, token);
 
@@ -31,11 +31,7 @@ export class UserService implements IUserServiceInteractor {
 
       await this.repository.verifyEmail(payload.uid, payload.email, email);
 
-      console.log("Verified");
-
       await this.repository.addTokenToBlacklist(uid, token);
-
-      console.log("Added to the blacklist tokens");
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);
@@ -63,6 +59,45 @@ export class UserService implements IUserServiceInteractor {
       const accessToken = this.auth.createToken({ uid: uid, setId: setId, tokenType: "ACCESS" });
 
       return accessToken;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
+  async passwordResetRequest(email: string): Promise<string> {
+    try {
+      const uid = await this.repository.getUidByEmail(email);
+
+      const token = this.auth.createToken({ uid: uid, email: email, tokenType: "PASSRESET" });
+
+      return token;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
+  async passwordReset(newPassword: string, token: string): Promise<void> {
+    try {
+      const payload = this.auth.getPayload({
+        token: token,
+        tokenType: "PASSRESET",
+      }) as emailAndResetPayloadType;
+
+      const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(payload.uid, token);
+
+      if (isTokenBlacklisted) throw new Error("blacklisted-token");
+
+      await this.repository.changePassword(payload.uid, newPassword);
+
+      await this.repository.addTokenToBlacklist(payload.uid, token);
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

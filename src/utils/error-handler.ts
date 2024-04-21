@@ -30,6 +30,16 @@ export const handleError = (err: Error): errorObject => {
       errObj.status = 400;
       return errObj;
 
+    case "invalid-password-reset-request":
+      errObj.message = "Password reset request is no longer valid!";
+      errObj.status = 400;
+      return errObj;
+
+    case "same-password-reset-request":
+      errObj.message = "New password and current password is the same!";
+      errObj.status = 400;
+      return errObj;
+
     case "wrong-credentials":
       errObj.message = "Username or password is invalid!";
       errObj.status = 401;
