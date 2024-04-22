@@ -6,6 +6,7 @@ import { UserRepository } from "../repositories/user.repository";
 import { UserService } from "../services/user.services";
 import { UserController } from "../controllers/user.controller";
 import {
+  changePasswordSchema,
   createSchema,
   loginSchema,
   passwordResetReqSchema,
@@ -35,6 +36,16 @@ const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares
 userRouter.post("/create", validateBody(createSchema), controller.onCreateUser.bind(controller));
 
 userRouter.post("/login", validateBody(loginSchema), controller.onLogin.bind(controller));
+
+userRouter.get("/get-password", (req, res, next) => middleware.handleReq(req, res, next)),
+  controller.onGetPassword.bind(controller);
+
+userRouter.patch(
+  "/change-password",
+  (req, res, next) => middleware.handleReq(req, res, next),
+  validateBody(changePasswordSchema),
+  controller.onChangePassword.bind(controller)
+);
 
 userRouter.post(
   "/verify-email",

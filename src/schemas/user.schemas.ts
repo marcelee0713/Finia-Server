@@ -35,3 +35,10 @@ export const passwordResetSchema = z.object({
     password: z.string().min(8),
   }),
 });
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    uid: z.string().trim(),
+    newPassword: z.string().min(8),
+  }),
+});

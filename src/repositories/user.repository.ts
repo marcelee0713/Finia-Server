@@ -62,6 +62,8 @@ export class UserRepository implements IUserRepository {
 
     if (res === null) throw new Error("user-does-not-exist");
 
+    if (!res.emailVerified) throw new Error("unverified-email");
+
     return res.uid;
   }
 
@@ -210,6 +212,25 @@ export class UserRepository implements IUserRepository {
     }
   }
 
+  async getPassword(uid: string): Promise<string> {
+    try {
+      const user = await this.prismaClient.user.findFirst({
+        where: {
+          uid: uid,
+        },
+      });
+
+      if (!user) throw new Error("user-does-not-exist");
+
+      if (!user.emailVerified) throw new Error("unverified-email");
+
+      return user.password;
+    } catch (err) {
+      if (err instanceof Error) throw new Error(err.message);
+      throw new Error("Internal server error");
+    }
+  }
+
   async changePassword(uid: string, newPassword: string): Promise<void> {
     try {
       const user = await this.prismaClient.user.findFirst({
@@ -219,6 +240,8 @@ export class UserRepository implements IUserRepository {
       });
 
       if (!user) throw new Error("user-does-not-exist");
+
+      if (!user.emailVerified) throw new Error("unverified-email");
 
       const isTheSame = await bcrypt.compare(newPassword, user.password);
 

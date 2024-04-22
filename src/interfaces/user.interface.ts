@@ -2,8 +2,10 @@ export interface IUserServiceInteractor {
   createUser(username: string, email: string, password: string): Promise<string>;
   logInUser(username: string, password: string): Promise<string>;
   verifyEmailAddress(uid: string, email: string, token: string): Promise<void>;
-  passwordResetRequest(email: string): Promise<string>;
-  passwordReset(newPassword: string, token: string): Promise<void>;
+  resetPasswordRequest(email: string): Promise<string>;
+  resetPassword(newPassword: string, token: string): Promise<void>;
+  changePassword(uid: string, newPassword: string): Promise<void>;
+  getPassword(uid: string): Promise<string>;
 }
 
 export interface IUserRepository {
@@ -16,4 +18,5 @@ export interface IUserRepository {
   checkTokenInBlacklist(uid: string, token: string): Promise<boolean>;
   addTokenToBlacklist(uid: string, token: string): Promise<void>;
   changePassword(uid: string, newPassword: string): Promise<void>;
+  getPassword(uid: string): Promise<string>;
 }

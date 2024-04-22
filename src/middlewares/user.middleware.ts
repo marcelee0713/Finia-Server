@@ -43,6 +43,7 @@ export class UserMiddlewares {
       });
 
       res.locals.newToken = newAccessToken;
+      res.locals.currentUid = payload.uid;
 
       return next();
     } catch (err) {

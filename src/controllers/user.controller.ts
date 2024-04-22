@@ -90,7 +90,7 @@ export class UserController {
     try {
       const email = req.body.email;
 
-      const token = await this.interactor.passwordResetRequest(email);
+      const token = await this.interactor.resetPasswordRequest(email);
 
       await this.emailService.sendResetPassword(token);
 
@@ -111,9 +111,48 @@ export class UserController {
       const newPassword = req.body.password;
       const token = req.body.token;
 
-      await this.interactor.passwordReset(newPassword, token);
+      await this.interactor.resetPassword(newPassword, token);
 
       return res.status(200).json({ res: "Successfully reset your password!" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
+  async onChangePassword(req: Request, res: Response) {
+    try {
+      const uid = req.body.uid;
+      const newPassword = req.body.newPassword;
+
+      await this.interactor.changePassword(uid, newPassword);
+
+      return res.status(200).json({ res: "Successfully reset your password!" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
+  async onGetPassword(req: Request, res: Response) {
+    try {
+      const uid = res.locals.uid;
+
+      if (!res.locals.uid) throw new Error("not-authorized");
+
+      const password = await this.interactor.getPassword(uid);
+
+      return res.status(200).json({ res: password });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err);

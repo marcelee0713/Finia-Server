@@ -68,7 +68,7 @@ export class UserService implements IUserServiceInteractor {
     }
   }
 
-  async passwordResetRequest(email: string): Promise<string> {
+  async resetPasswordRequest(email: string): Promise<string> {
     try {
       const uid = await this.repository.getUidByEmail(email);
 
@@ -84,7 +84,7 @@ export class UserService implements IUserServiceInteractor {
     }
   }
 
-  async passwordReset(newPassword: string, token: string): Promise<void> {
+  async resetPassword(newPassword: string, token: string): Promise<void> {
     try {
       const payload = this.auth.getPayload({
         token: token,
@@ -98,6 +98,30 @@ export class UserService implements IUserServiceInteractor {
       await this.repository.changePassword(payload.uid, newPassword);
 
       await this.repository.addTokenToBlacklist(payload.uid, token);
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
+  async changePassword(uid: string, newPassword: string): Promise<void> {
+    try {
+      await this.repository.changePassword(uid, newPassword);
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
+  async getPassword(uid: string): Promise<string> {
+    try {
+      return await this.repository.getPassword(uid);
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);
