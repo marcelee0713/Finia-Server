@@ -30,6 +30,8 @@ export class UserMiddlewares {
         tokenType: "ACCESS",
       }) as payloadType;
 
+      res.locals.token = accessToken;
+
       if (!payload.expired) return next();
 
       const refreshToken = await this.userRepo.checkSession(payload.uid, payload.setId);
@@ -42,7 +44,7 @@ export class UserMiddlewares {
         tokenType: "ACCESS",
       });
 
-      res.locals.newToken = newAccessToken;
+      res.locals.token = newAccessToken;
       res.locals.currentUid = payload.uid;
 
       return next();

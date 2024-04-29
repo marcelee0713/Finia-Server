@@ -3,7 +3,7 @@ import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.inte
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
-import { emailAndResetPayloadType } from "../types/jwt.types";
+import { emailAndResetPayloadType, payloadType } from "../types/jwt.types";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
@@ -59,6 +59,22 @@ export class UserService implements IUserServiceInteractor {
       const accessToken = this.auth.createToken({ uid: uid, setId: setId, tokenType: "ACCESS" });
 
       return accessToken;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
+  async logOutUser(token: string): Promise<void> {
+    try {
+      const data = this.auth.getPayload({ token: token, tokenType: "ACCESS" }) as payloadType;
+
+      await this.repository.addTokenToBlacklist(data.uid, token);
+
+      await this.repository.removeSession(data.uid, data.setId);
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

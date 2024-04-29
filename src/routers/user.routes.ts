@@ -37,6 +37,12 @@ userRouter.post("/create", validateBody(createSchema), controller.onCreateUser.b
 
 userRouter.post("/login", validateBody(loginSchema), controller.onLogin.bind(controller));
 
+userRouter.delete(
+  "/logout",
+  (req, res, next) => middleware.handleReq(req, res, next),
+  controller.onLogout.bind(controller)
+);
+
 userRouter.get("/get-password", (req, res, next) => middleware.handleReq(req, res, next)),
   controller.onGetPassword.bind(controller);
 

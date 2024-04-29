@@ -41,14 +41,16 @@ model transactions {
   category_id String?
   amount      String          @db.String(11)
   type        transactionType
+  note        String?         @db.String(255)
   created_at  DateTime        @default(now())
 }
 
 model categories {
-  uid          String         @id @default(cuid())
-  transactions transactions[]
-  category     String
-  created_at   DateTime       @default(now())
+  uid              String          @id @default(cuid())
+  transactions     transactions[]
+  category         String
+  transaction_type transactionType
+  created_at       DateTime        @default(now())
 }
 
 enum role {

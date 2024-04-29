@@ -66,6 +66,26 @@ export class UserController {
     }
   }
 
+  async onLogout(req: Request, res: Response) {
+    try {
+      const token = res.locals.token;
+
+      if (!token) throw new Error("not-authorized");
+
+      await this.interactor.logOutUser(token);
+
+      return res.clearCookie("token").status(200).json({ res: "Successfully logged out user" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
   async onVerifyEmail(req: Request, res: Response) {
     try {
       const uid = req.body.uid;

@@ -88,6 +88,25 @@ export class UserRepository implements IUserRepository {
     }
   }
 
+  async removeSession(uid: string, setId: string): Promise<void> {
+    const redis: RedisClientType = await redisClient();
+
+    try {
+      const refreshToken = await this.checkSession(uid, setId);
+
+      const key = `${uid}:sessions`;
+
+      const member = `${setId}:${refreshToken}`;
+
+      await redis.ZREM(key, member);
+    } catch (err) {
+      if (err instanceof Error) throw new Error(err.message);
+      throw new Error("Internal server error");
+    } finally {
+      await redis.disconnect();
+    }
+  }
+
   async checkSession(uid: string, setId: string): Promise<string> {
     const redis: RedisClientType = await redisClient();
 
@@ -169,6 +188,17 @@ export class UserRepository implements IUserRepository {
 
     try {
       const key = `${uid}:blacklisted_tokens`;
+
+      const keyExistence = await redis.KEYS(`${key}*`);
+
+      const sessionKey: string | undefined = keyExistence[0];
+
+      const todayTimestamp = Math.floor(Date.now() / 1000);
+
+      // Clear out the expired blacklisted tokens first
+      if (sessionKey) {
+        await redis.ZREMRANGEBYSCORE(sessionKey, "-inf", todayTimestamp);
+      }
 
       const thirtyDaysFutureTimestamp = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
 

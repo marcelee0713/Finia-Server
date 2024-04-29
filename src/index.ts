@@ -18,4 +18,4 @@ app.listen(PORT, () => {
   console.log(`Currently listening on PORT: ${PORT}`);
 });
 
-app.use("/v1/users", userRouter);
+app.use("/api/v1/users", userRouter);

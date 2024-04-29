@@ -18,6 +18,7 @@ export type emailAndResetPayloadType = {
 
 export type resetPassPayloadType = {
   uid: string;
+  email: string;
 };
 
 export type payloadParams = {
