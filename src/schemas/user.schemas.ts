@@ -23,6 +23,13 @@ export const verifyEmailSchema = z.object({
   }),
 });
 
+export const emailVerifyReqSchema = z.object({
+  body: z.object({
+    username: z.string().optional().nullable(),
+    token: z.string().optional().nullable(),
+  }),
+});
+
 export const passwordResetReqSchema = z.object({
   body: z.object({
     email: z.string().email().trim(),

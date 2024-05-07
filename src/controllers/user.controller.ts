@@ -86,6 +86,27 @@ export class UserController {
     }
   }
 
+  async onEmailVerificationReq(req: Request, res: Response) {
+    try {
+      const token = req.body.token;
+      const username = req.body.username;
+
+      const data = await this.interactor.emailVerificationRequest(username, token);
+
+      await this.emailService.sendEmail(data.uid, data.email);
+
+      res.status(200).json({ res: "Successfully requested an email verification!" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err);
+
+        return res.status(errObj.status).json({ error: errObj.message });
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
   async onVerifyEmail(req: Request, res: Response) {
     try {
       const uid = req.body.uid;

@@ -25,6 +25,32 @@ export const handleError = (err: Error): errorObject => {
       errObj.status = 404;
       return errObj;
 
+    case "invalid-request":
+      errObj.message = "Bad request, no data in the body provided!";
+      errObj.status = 400;
+      return errObj;
+
+    case "invalid-username":
+      errObj.message = "Username is not valid, please follow the format!";
+      errObj.status = 400;
+      return errObj;
+
+    case "invalid-password":
+      errObj.message = "Password is not valid, please follow the format!";
+      errObj.status = 400;
+      return errObj;
+
+    case "invalid-email":
+      errObj.message = "Email is not valid, please follow the format!";
+      errObj.status = 400;
+      return errObj;
+
+    case "uid-mismatch":
+      errObj.message =
+        "UID in the request body does not match in the token's payload, please create another email verification request!";
+      errObj.status = 400;
+      return errObj;
+
     case "invalid-email-verification":
       errObj.message = "Email verification is no longer valid!";
       errObj.status = 400;

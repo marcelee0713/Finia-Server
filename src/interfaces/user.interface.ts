@@ -2,6 +2,10 @@ export interface IUserServiceInteractor {
   createUser(username: string, email: string, password: string): Promise<string>;
   logInUser(username: string, password: string): Promise<string>;
   logOutUser(token: string): Promise<void>;
+  emailVerificationRequest(
+    username: string,
+    token: string
+  ): Promise<{ uid: string; email: string }>;
   verifyEmailAddress(uid: string, email: string, token: string): Promise<void>;
   resetPasswordRequest(email: string): Promise<string>;
   resetPassword(newPassword: string, token: string): Promise<void>;
@@ -11,6 +15,7 @@ export interface IUserServiceInteractor {
 
 export interface IUserRepository {
   create(username: string, email: string, password: string): Promise<string>;
+  getUidAndEmailByUsername(username: string): Promise<{ uid: string; email: string }>;
   getUid(username: string, password: string): Promise<string>;
   getUidByEmail(email: string): Promise<string>;
   setSession(uid: string, setId: string, refreshToken: string): Promise<void>;

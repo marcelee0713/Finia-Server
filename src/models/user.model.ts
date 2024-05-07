@@ -5,7 +5,7 @@ export class User {
   private emailVerified: Date | null;
   private password: string;
   private role: string;
-  private createdAt: Date;
+  private created_at: Date | null;
 
   constructor(
     uid: string,
@@ -14,7 +14,7 @@ export class User {
     emailVerified: Date | null,
     password: string,
     role: string,
-    createdAt: Date
+    created_at: Date | null
   ) {
     this.uid = uid;
     this.username = username;
@@ -22,7 +22,7 @@ export class User {
     this.emailVerified = emailVerified;
     this.password = password;
     this.role = role;
-    this.createdAt = createdAt;
+    this.created_at = created_at;
   }
 
   getUid = (): string => this.uid;
@@ -61,11 +61,54 @@ export class User {
     this.role = role;
   };
 
-  getCreatedAt = (): Date => this.createdAt;
+  getcreated_at = (): Date | null => this.created_at;
 
-  setCreatedAt = (date: Date) => {
-    this.createdAt = date;
+  setcreated_at = (date: Date) => {
+    this.created_at = date;
   };
 
-  isPasswordMatch = (password: string): boolean => this.password === password;
+  validateUsername() {
+    const minLength = 3;
+    const maxLength = 50;
+    const usernameRegex = /^[a-zA-Z]{2}[a-zA-Z0-9]*$/;
+
+    if (this.username.length < minLength || this.username.length > maxLength) {
+      throw new Error("invalid-username");
+    }
+
+    if (!usernameRegex.test(this.username)) {
+      throw new Error("invalid-username");
+    }
+  }
+
+  validatePassword() {
+    const minLength = 8;
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
+
+    if (this.password.length < minLength) {
+      throw new Error("invalid-password");
+    }
+
+    if (!passwordRegex.test(this.password)) {
+      throw new Error("invalid-password");
+    }
+  }
+
+  validateEmail() {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(this.email)) {
+      throw new Error("invalid-email");
+    }
+  }
+
+  validateCreateUser(username?: string, email?: string, password?: string) {
+    this.username = username ?? "";
+    this.email = email ?? "";
+    this.password = password ?? "";
+
+    this.validateUsername();
+    this.validateEmail();
+    this.validatePassword();
+  }
 }

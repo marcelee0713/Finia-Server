@@ -8,4 +8,5 @@ import {
 export interface IJWTService {
   createToken({ uid, setId, tokenType }: jwtParams): string;
   getPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType;
+  getDecodedPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType;
 }

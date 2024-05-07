@@ -1,6 +1,12 @@
 import jwt from "jsonwebtoken";
 import { TOKENS_LIFESPAN } from "../utils";
-import { jwtParams, payloadParams, payloadType, resetPassPayloadType } from "../types/jwt.types";
+import {
+  emailAndResetPayloadType,
+  jwtParams,
+  payloadParams,
+  payloadType,
+  resetPassPayloadType,
+} from "../types/jwt.types";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { injectable } from "inversify";
 
@@ -10,6 +16,23 @@ export class JWTServices implements IJWTService {
 
   constructor() {
     this.jwtClient = jwt;
+  }
+
+  getDecodedPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType {
+    if (tokenType === "EMAIL" || tokenType === "PASSRESET") {
+      const payload = this.jwtClient.decode(token) as emailAndResetPayloadType;
+
+      return payload;
+    }
+
+    const payload = this.jwtClient.decode(token) as payloadType;
+
+    const expiredPayload: payloadType = {
+      ...payload,
+      expired: true,
+    };
+
+    return expiredPayload;
   }
 
   getPayload({ token, tokenType }: payloadParams): payloadType | resetPassPayloadType {

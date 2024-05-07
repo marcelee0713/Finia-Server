@@ -4,11 +4,13 @@ import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
 import { emailAndResetPayloadType, payloadType } from "../types/jwt.types";
+import { User } from "../models/user.model";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
   private repository: IUserRepository;
   private auth: IJWTService;
+  private userEntity: User;
 
   constructor(
     @inject(INTERFACE_TYPE.UserRepository) repository: IUserRepository,
@@ -16,14 +18,21 @@ export class UserService implements IUserServiceInteractor {
   ) {
     this.auth = auth;
     this.repository = repository;
+    this.userEntity = new User("", "", "", null, "", "", null);
   }
 
   async verifyEmailAddress(uid: string, email: string, token: string): Promise<void> {
     try {
+      this.userEntity.setEmail(email);
+
+      this.userEntity.validateEmail();
+
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "EMAIL",
       }) as emailAndResetPayloadType;
+
+      if (uid !== payload.uid) throw new Error("uid-mismatch");
 
       const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(uid, token);
 
@@ -41,8 +50,46 @@ export class UserService implements IUserServiceInteractor {
     }
   }
 
+  async emailVerificationRequest(
+    username: string,
+    token: string
+  ): Promise<{ uid: string; email: string }> {
+    try {
+      let user = {
+        uid: "",
+        email: "",
+      };
+
+      if (!username && !token) throw new Error("invalid-request");
+
+      if (username && !token) {
+        const data = await this.repository.getUidAndEmailByUsername(username);
+
+        user = data;
+      } else {
+        const payload = this.auth.getDecodedPayload({
+          token: token,
+          tokenType: "EMAIL",
+        }) as emailAndResetPayloadType;
+
+        user = payload;
+      }
+
+      return user;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
   async createUser(username: string, email: string, password: string): Promise<string> {
+    this.userEntity.validateCreateUser(username, email, password);
+
     const uid = await this.repository.create(username, email, password);
+
     return uid;
   }
 
@@ -86,6 +133,10 @@ export class UserService implements IUserServiceInteractor {
 
   async resetPasswordRequest(email: string): Promise<string> {
     try {
+      this.userEntity.setEmail(email);
+
+      this.userEntity.validateEmail();
+
       const uid = await this.repository.getUidByEmail(email);
 
       const token = this.auth.createToken({ uid: uid, email: email, tokenType: "PASSRESET" });
@@ -102,6 +153,10 @@ export class UserService implements IUserServiceInteractor {
 
   async resetPassword(newPassword: string, token: string): Promise<void> {
     try {
+      this.userEntity.setPassword(newPassword);
+
+      this.userEntity.validatePassword();
+
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "PASSRESET",
@@ -125,6 +180,10 @@ export class UserService implements IUserServiceInteractor {
 
   async changePassword(uid: string, newPassword: string): Promise<void> {
     try {
+      this.userEntity.setPassword(newPassword);
+
+      this.userEntity.validatePassword();
+
       await this.repository.changePassword(uid, newPassword);
     } catch (err) {
       if (err instanceof Error) {

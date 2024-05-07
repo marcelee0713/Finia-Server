@@ -8,6 +8,7 @@ import { UserController } from "../controllers/user.controller";
 import {
   changePasswordSchema,
   createSchema,
+  emailVerifyReqSchema,
   loginSchema,
   passwordResetReqSchema,
   passwordResetSchema,
@@ -57,6 +58,12 @@ userRouter.post(
   "/verify-email",
   validateBody(verifyEmailSchema),
   controller.onVerifyEmail.bind(controller)
+);
+
+userRouter.post(
+  "/req-email-verification",
+  validateBody(emailVerifyReqSchema),
+  controller.onEmailVerificationReq.bind(controller)
 );
 
 userRouter.patch(

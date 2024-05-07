@@ -1,9 +1,9 @@
-import { Prisma, PrismaClient } from "@prisma/client";
 import { IUserRepository } from "../interfaces/user.interface";
-import { db } from "../db/db.server";
 import * as bcrypt from "bcrypt";
 import { injectable } from "inversify";
 import { RedisClientType, redisClient } from "../db/redis";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { db } from "../db/db.server";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -11,6 +11,32 @@ export class UserRepository implements IUserRepository {
 
   constructor() {
     this.prismaClient = db;
+  }
+
+  async getUidAndEmailByUsername(username: string): Promise<{ uid: string; email: string }> {
+    try {
+      const user = await this.prismaClient.user.findFirst({
+        where: {
+          username: username,
+        },
+      });
+
+      if (user === null) throw new Error("user-does-not-exist");
+
+      return {
+        ...user,
+      };
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === "P2001") {
+          throw new Error("user-does-not-exist");
+        }
+      }
+
+      if (err instanceof Error) throw new Error(err.message);
+
+      throw new Error("Internal server error");
+    }
   }
 
   async create(username: string, email: string, password: string): Promise<string> {
