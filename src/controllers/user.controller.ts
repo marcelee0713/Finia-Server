@@ -33,7 +33,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -42,6 +42,10 @@ export class UserController {
 
   async onLogin(req: Request, res: Response) {
     try {
+      const isLoggedIn = req.cookies.token;
+
+      if (isLoggedIn) throw new Error("user-already-logged-in");
+
       const username = req.body.username;
       const password = req.body.password;
 
@@ -59,7 +63,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -79,7 +83,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -100,7 +104,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -120,7 +124,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -140,7 +144,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -159,7 +163,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -178,7 +182,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });
@@ -198,7 +202,7 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error." });

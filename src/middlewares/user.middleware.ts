@@ -53,7 +53,7 @@ export class UserMiddlewares {
       if (err instanceof Error) {
         const errObj = handleError(err);
 
-        return res.status(errObj.status).json({ error: errObj.message });
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error" });
