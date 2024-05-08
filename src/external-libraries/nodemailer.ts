@@ -4,7 +4,7 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { DEFAULT_EMAIL_CONTENT, DEFAULT_RESET_PASS_CONTENT, INTERFACE_TYPE } from "../utils";
 import { inject, injectable } from "inversify";
 import { IJWTService } from "../interfaces/jwt.interface";
-import { emailAndResetPayloadType } from "../types/jwt.types";
+import { EmailAndResetPayloadType } from "../types/jwt.types";
 
 @injectable()
 export class EmailServices implements IEmailService {
@@ -67,7 +67,7 @@ export class EmailServices implements IEmailService {
       const payload = this.jwtService.getPayload({
         token: token,
         tokenType: "PASSRESET",
-      }) as emailAndResetPayloadType;
+      }) as EmailAndResetPayloadType;
 
       this.url = `${this.url}${resetPassRoute}?token=${token}`;
 

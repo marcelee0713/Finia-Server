@@ -1,27 +1,24 @@
-export type jwtParams = {
-  tokenType?: "REFRESH" | "ACCESS" | "EMAIL" | "PASSRESET";
+export interface JWTParams {
+  tokenType?: TokenType;
   uid: string;
   setId?: string;
   email?: string;
-};
+}
 
-export type payloadType = {
+export interface PayloadType {
   uid: string;
   setId: string;
   expired?: boolean;
-};
+}
 
-export type emailAndResetPayloadType = {
+export interface EmailAndResetPayloadType {
   uid: string;
   email: string;
-};
+}
 
-export type resetPassPayloadType = {
-  uid: string;
-  email: string;
-};
+export type TokenType = "REFRESH" | "ACCESS" | "EMAIL" | "PASSRESET";
 
-export type payloadParams = {
+export interface PayloadParams {
   token: string;
-  tokenType: "REFRESH" | "ACCESS" | "EMAIL" | "PASSRESET";
-};
+  tokenType: TokenType;
+}

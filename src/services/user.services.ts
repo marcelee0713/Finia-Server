@@ -3,7 +3,7 @@ import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.inte
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
-import { emailAndResetPayloadType, payloadType } from "../types/jwt.types";
+import { EmailAndResetPayloadType, PayloadType } from "../types/jwt.types";
 import { User } from "../models/user.model";
 
 @injectable()
@@ -30,7 +30,7 @@ export class UserService implements IUserServiceInteractor {
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "EMAIL",
-      }) as emailAndResetPayloadType;
+      }) as EmailAndResetPayloadType;
 
       if (uid !== payload.uid) throw new Error("uid-mismatch");
 
@@ -63,14 +63,17 @@ export class UserService implements IUserServiceInteractor {
       if (!username && !token) throw new Error("invalid-request");
 
       if (username && !token) {
-        const data = await this.repository.getUidAndEmailByUsername(username);
+        const data = await this.repository.getUserData({ username });
 
-        user = data;
+        user = {
+          email: data._email,
+          uid: data._uid,
+        };
       } else {
         const payload = this.auth.getDecodedPayload({
           token: token,
           tokenType: "EMAIL",
-        }) as emailAndResetPayloadType;
+        }) as EmailAndResetPayloadType;
 
         user = payload;
       }
@@ -95,15 +98,23 @@ export class UserService implements IUserServiceInteractor {
 
   async logInUser(username: string, password: string): Promise<string> {
     try {
-      const uid = await this.repository.getUid(username, password);
+      const data = await this.repository.getUserData({ username, password });
 
       const setId = generateSetId();
 
-      const refreshToken = this.auth.createToken({ uid: uid, setId: setId, tokenType: "REFRESH" });
+      const refreshToken = this.auth.createToken({
+        uid: data._uid,
+        setId: setId,
+        tokenType: "REFRESH",
+      });
 
-      await this.repository.setSession(uid, setId, refreshToken);
+      await this.repository.setSession(data._uid, setId, refreshToken);
 
-      const accessToken = this.auth.createToken({ uid: uid, setId: setId, tokenType: "ACCESS" });
+      const accessToken = this.auth.createToken({
+        uid: data._uid,
+        setId: setId,
+        tokenType: "ACCESS",
+      });
 
       return accessToken;
     } catch (err) {
@@ -117,7 +128,7 @@ export class UserService implements IUserServiceInteractor {
 
   async logOutUser(token: string): Promise<void> {
     try {
-      const data = this.auth.getPayload({ token: token, tokenType: "ACCESS" }) as payloadType;
+      const data = this.auth.getPayload({ token: token, tokenType: "ACCESS" }) as PayloadType;
 
       await this.repository.addTokenToBlacklist(data.uid, token);
 
@@ -137,9 +148,9 @@ export class UserService implements IUserServiceInteractor {
 
       this.userEntity.validateEmail();
 
-      const uid = await this.repository.getUidByEmail(email);
+      const data = await this.repository.getUserData({ email });
 
-      const token = this.auth.createToken({ uid: uid, email: email, tokenType: "PASSRESET" });
+      const token = this.auth.createToken({ uid: data._uid, email: email, tokenType: "PASSRESET" });
 
       return token;
     } catch (err) {
@@ -160,7 +171,7 @@ export class UserService implements IUserServiceInteractor {
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "PASSRESET",
-      }) as emailAndResetPayloadType;
+      }) as EmailAndResetPayloadType;
 
       const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(payload.uid, token);
 
@@ -196,7 +207,9 @@ export class UserService implements IUserServiceInteractor {
 
   async getPassword(uid: string): Promise<string> {
     try {
-      return await this.repository.getPassword(uid);
+      const data = await this.repository.getUserData({ uid });
+
+      return data._password;
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

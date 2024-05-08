@@ -4,7 +4,7 @@ import { IUserRepository } from "../interfaces/user.interface";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { inject, injectable } from "inversify";
 import { INTERFACE_TYPE } from "../utils/appConst";
-import { payloadType } from "../types/jwt.types";
+import { PayloadType } from "../types/jwt.types";
 
 @injectable()
 export class UserMiddlewares {
@@ -28,7 +28,7 @@ export class UserMiddlewares {
       const payload = this.jwt.getPayload({
         token: accessToken,
         tokenType: "ACCESS",
-      }) as payloadType;
+      }) as PayloadType;
 
       res.locals.token = accessToken;
 

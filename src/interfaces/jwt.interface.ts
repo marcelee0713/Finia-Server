@@ -1,12 +1,12 @@
 import {
-  emailAndResetPayloadType,
-  jwtParams,
-  payloadParams,
-  payloadType,
+  EmailAndResetPayloadType,
+  JWTParams,
+  PayloadParams,
+  PayloadType,
 } from "../types/jwt.types";
 
 export interface IJWTService {
-  createToken({ uid, setId, tokenType }: jwtParams): string;
-  getPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType;
-  getDecodedPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType;
+  createToken({ uid, setId, tokenType }: JWTParams): string;
+  getPayload({ token, tokenType }: PayloadParams): PayloadType | EmailAndResetPayloadType;
+  getDecodedPayload({ token, tokenType }: PayloadParams): PayloadType | EmailAndResetPayloadType;
 }

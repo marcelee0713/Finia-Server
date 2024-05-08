@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
 import { TOKENS_LIFESPAN } from "../utils";
 import {
-  emailAndResetPayloadType,
-  jwtParams,
-  payloadParams,
-  payloadType,
-  resetPassPayloadType,
+  EmailAndResetPayloadType,
+  JWTParams,
+  PayloadParams,
+  PayloadType,
 } from "../types/jwt.types";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { injectable } from "inversify";
@@ -18,16 +17,16 @@ export class JWTServices implements IJWTService {
     this.jwtClient = jwt;
   }
 
-  getDecodedPayload({ token, tokenType }: payloadParams): payloadType | emailAndResetPayloadType {
+  getDecodedPayload({ token, tokenType }: PayloadParams): PayloadType | EmailAndResetPayloadType {
     if (tokenType === "EMAIL" || tokenType === "PASSRESET") {
-      const payload = this.jwtClient.decode(token) as emailAndResetPayloadType;
+      const payload = this.jwtClient.decode(token) as EmailAndResetPayloadType;
 
       return payload;
     }
 
-    const payload = this.jwtClient.decode(token) as payloadType;
+    const payload = this.jwtClient.decode(token) as PayloadType;
 
-    const expiredPayload: payloadType = {
+    const expiredPayload: PayloadType = {
       ...payload,
       expired: true,
     };
@@ -35,7 +34,7 @@ export class JWTServices implements IJWTService {
     return expiredPayload;
   }
 
-  getPayload({ token, tokenType }: payloadParams): payloadType | resetPassPayloadType {
+  getPayload({ token, tokenType }: PayloadParams): PayloadType | EmailAndResetPayloadType {
     const secret =
       tokenType === "REFRESH"
         ? (process.env.REFRESH_TOKEN_SECRETKEY as string)
@@ -50,8 +49,8 @@ export class JWTServices implements IJWTService {
           ? (this.jwtClient.verify(
               token,
               tokenType === "EMAIL" ? emailSecret : passwordResetSecret
-            ) as resetPassPayloadType)
-          : (this.jwtClient.verify(token, secret) as payloadType);
+            ) as EmailAndResetPayloadType)
+          : (this.jwtClient.verify(token, secret) as PayloadType);
 
       return payload;
     } catch (err) {
@@ -61,9 +60,9 @@ export class JWTServices implements IJWTService {
 
       if (tokenType === "PASSRESET") throw new Error("invalid-password-reset-request");
 
-      const payload = this.jwtClient.decode(token) as payloadType;
+      const payload = this.jwtClient.decode(token) as PayloadType;
 
-      const expiredPayload: payloadType = {
+      const expiredPayload: PayloadType = {
         ...payload,
         expired: true,
       };
@@ -72,7 +71,7 @@ export class JWTServices implements IJWTService {
     }
   }
 
-  createToken({ uid, setId, tokenType, email }: jwtParams): string {
+  createToken({ uid, setId, tokenType, email }: JWTParams): string {
     const secret =
       tokenType === "REFRESH"
         ? (process.env.REFRESH_TOKEN_SECRETKEY as string)
