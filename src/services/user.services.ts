@@ -65,6 +65,8 @@ export class UserService implements IUserServiceInteractor {
       if (username && !token) {
         const data = await this.repository.getUserData({ username, useCases: ["DEFAULT"] });
 
+        if (data._emailVerified) throw new Error("user-already-verified");
+
         user = {
           email: data._email,
           uid: data._uid,
@@ -77,6 +79,10 @@ export class UserService implements IUserServiceInteractor {
 
         user = payload;
       }
+
+      const data = await this.repository.getUserData({ ...user, useCases: ["DEFAULT"] });
+
+      if (data._emailVerified) throw new Error("user-already-verified");
 
       return user;
     } catch (err) {

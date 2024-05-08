@@ -6,7 +6,7 @@ import userRouter from "./routers/user.routes";
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 
 const PORT = process.env.PORT || 3000;
 
