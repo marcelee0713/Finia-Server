@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "cockroachdb"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL") // use DEV_DATABASE_URL for creating 
 }
 
 model user {
@@ -20,25 +20,16 @@ model user {
   emailVerified DateTime?
   password      String
   role          role           @default(USER)
-  sessions      sessions[]
   transactions  transactions[]
   created_at    DateTime       @default(now())
 }
 
-model sessions {
-  uid        String   @id @default(cuid())
-  session_id String   @db.String(500)
-  users      user?    @relation(fields: [user_id], references: [uid])
-  user_id    String?  @db.String(40)
-  created_at DateTime @default(now())
-}
-
 model transactions {
   uid         String          @id @default(cuid())
-  user        user?           @relation(fields: [user_id], references: [uid])
-  user_id     String?
-  categories  categories?     @relation(fields: [category_id], references: [uid])
-  category_id String?
+  user        user            @relation(fields: [user_id], references: [uid], onDelete: Cascade)
+  user_id     String
+  categories  categories      @relation(fields: [category_id], references: [uid])
+  category_id String
   amount      String          @db.String(11)
   type        transactionType
   note        String?         @db.String(255)
