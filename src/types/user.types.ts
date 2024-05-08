@@ -3,4 +3,7 @@ export interface UserParams {
   password?: string;
   uid?: string;
   email?: string;
+  useCases: UseCase[];
 }
+
+type UseCase = "DEFAULT" | "VERIFY_EMAIL" | "LOGIN";

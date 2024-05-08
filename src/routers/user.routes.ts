@@ -44,8 +44,11 @@ userRouter.delete(
   controller.onLogout.bind(controller)
 );
 
-userRouter.get("/get-password", (req, res, next) => middleware.handleReq(req, res, next)),
-  controller.onGetPassword.bind(controller);
+userRouter.get(
+  "/get-password",
+  (req, res, next) => middleware.handleReq(req, res, next),
+  controller.onGetPassword.bind(controller)
+);
 
 userRouter.patch(
   "/change-password",

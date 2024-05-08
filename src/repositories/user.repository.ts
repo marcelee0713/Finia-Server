@@ -21,11 +21,20 @@ export class UserRepository implements IUserRepository {
           uid: data.uid,
           username: data.username,
           email: data.email,
-          password: data.password,
         },
       });
 
       if (user === null) throw new Error("user-does-not-exist");
+
+      if (data.password && data.useCases.includes("LOGIN")) {
+        const isMatch = await bcrypt.compare(data.password, user.password);
+
+        if (!isMatch) throw new Error("wrong-credentials");
+      }
+
+      if (data.useCases.includes("VERIFY_EMAIL")) {
+        if (!user.emailVerified) throw new Error("unverified-email");
+      }
 
       return {
         _uid: user.uid,
@@ -35,32 +44,6 @@ export class UserRepository implements IUserRepository {
         _role: user.role,
         _emailVerified: user.emailVerified,
         _created_at: user.created_at,
-      };
-    } catch (err) {
-      if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === "P2001") {
-          throw new Error("user-does-not-exist");
-        }
-      }
-
-      if (err instanceof Error) throw new Error(err.message);
-
-      throw new Error("Internal server error");
-    }
-  }
-
-  async getUidAndEmailByUsername(username: string): Promise<{ uid: string; email: string }> {
-    try {
-      const user = await this.prismaClient.user.findFirst({
-        where: {
-          username: username,
-        },
-      });
-
-      if (user === null) throw new Error("user-does-not-exist");
-
-      return {
-        ...user,
       };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -109,20 +92,6 @@ export class UserRepository implements IUserRepository {
     const isMatch = await bcrypt.compare(password, res.password);
 
     if (!isMatch) throw new Error("wrong-credentials");
-
-    if (!res.emailVerified) throw new Error("unverified-email");
-
-    return res.uid;
-  }
-
-  async getUidByEmail(email: string): Promise<string> {
-    const res = await this.prismaClient.user.findUnique({
-      where: {
-        email: email,
-      },
-    });
-
-    if (res === null) throw new Error("user-does-not-exist");
 
     if (!res.emailVerified) throw new Error("unverified-email");
 

@@ -63,7 +63,7 @@ export class UserService implements IUserServiceInteractor {
       if (!username && !token) throw new Error("invalid-request");
 
       if (username && !token) {
-        const data = await this.repository.getUserData({ username });
+        const data = await this.repository.getUserData({ username, useCases: ["DEFAULT"] });
 
         user = {
           email: data._email,
@@ -98,7 +98,11 @@ export class UserService implements IUserServiceInteractor {
 
   async logInUser(username: string, password: string): Promise<string> {
     try {
-      const data = await this.repository.getUserData({ username, password });
+      const data = await this.repository.getUserData({
+        username,
+        password,
+        useCases: ["LOGIN", "VERIFY_EMAIL"],
+      });
 
       const setId = generateSetId();
 
@@ -148,7 +152,7 @@ export class UserService implements IUserServiceInteractor {
 
       this.userEntity.validateEmail();
 
-      const data = await this.repository.getUserData({ email });
+      const data = await this.repository.getUserData({ email, useCases: ["DEFAULT"] });
 
       const token = this.auth.createToken({ uid: data._uid, email: email, tokenType: "PASSRESET" });
 
@@ -207,7 +211,7 @@ export class UserService implements IUserServiceInteractor {
 
   async getPassword(uid: string): Promise<string> {
     try {
-      const data = await this.repository.getUserData({ uid });
+      const data = await this.repository.getUserData({ uid, useCases: ["DEFAULT"] });
 
       return data._password;
     } catch (err) {

@@ -31,6 +31,7 @@ export class UserMiddlewares {
       }) as PayloadType;
 
       res.locals.token = accessToken;
+      res.locals.uid = payload.uid;
 
       if (!payload.expired) return next();
 
@@ -45,7 +46,7 @@ export class UserMiddlewares {
       });
 
       res.locals.token = newAccessToken;
-      res.locals.currentUid = payload.uid;
+      res.locals.uid = payload.uid;
 
       return next();
     } catch (err) {
