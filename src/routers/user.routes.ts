@@ -20,6 +20,13 @@ import { validateBody } from "../middlewares/req.middleware";
 import { UserMiddlewares } from "../middlewares/user.middleware";
 import { IEmailService } from "../interfaces/nodemailer.interface";
 import { EmailServices } from "../external-libraries/nodemailer";
+import {
+  createAccountRateLimit,
+  emailAndPassVerifyingRateLimit,
+  emailAndPasswordVerificationRequestRateLimit,
+  loginAndOutRateLimit,
+  passwordModificationRateLimit,
+} from "../middlewares/rate.limit";
 
 export const container = new Container();
 container.bind<IUserRepository>(INTERFACE_TYPE.UserRepository).to(UserRepository);
@@ -34,24 +41,37 @@ const userRouter = express.Router();
 const controller = container.get<UserController>(INTERFACE_TYPE.UserController);
 const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
 
-userRouter.post("/create", validateBody(createSchema), controller.onCreateUser.bind(controller));
+userRouter.post(
+  "/create",
+  createAccountRateLimit,
+  validateBody(createSchema),
+  controller.onCreateUser.bind(controller)
+);
 
-userRouter.post("/login", validateBody(loginSchema), controller.onLogin.bind(controller));
+userRouter.post(
+  "/login",
+  loginAndOutRateLimit,
+  validateBody(loginSchema),
+  controller.onLogin.bind(controller)
+);
 
 userRouter.delete(
   "/logout",
+  loginAndOutRateLimit,
   (req, res, next) => middleware.handleReq(req, res, next),
   controller.onLogout.bind(controller)
 );
 
 userRouter.get(
   "/get-password",
+  passwordModificationRateLimit,
   (req, res, next) => middleware.handleReq(req, res, next),
   controller.onGetPassword.bind(controller)
 );
 
 userRouter.patch(
   "/change-password",
+  passwordModificationRateLimit,
   (req, res, next) => middleware.handleReq(req, res, next),
   validateBody(changePasswordSchema),
   controller.onChangePassword.bind(controller)
@@ -59,24 +79,28 @@ userRouter.patch(
 
 userRouter.post(
   "/verify-email",
+  emailAndPassVerifyingRateLimit,
   validateBody(verifyEmailSchema),
   controller.onVerifyEmail.bind(controller)
 );
 
 userRouter.post(
   "/req-email-verification",
+  emailAndPasswordVerificationRequestRateLimit,
   validateBody(emailVerifyReqSchema),
   controller.onEmailVerificationReq.bind(controller)
 );
 
 userRouter.patch(
   "/reset-password",
+  emailAndPassVerifyingRateLimit,
   validateBody(passwordResetSchema),
   controller.onPasswordReset.bind(controller)
 );
 
 userRouter.post(
   "/req-reset-password",
+  emailAndPasswordVerificationRequestRateLimit,
   validateBody(passwordResetReqSchema),
   controller.onPasswordResetReq.bind(controller)
 );
