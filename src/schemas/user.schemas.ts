@@ -17,8 +17,6 @@ export const loginSchema = z.object({
 
 export const verifyEmailSchema = z.object({
   body: z.object({
-    uid: z.string().trim(),
-    email: z.string().email().trim(),
     token: z.string().trim(),
   }),
 });

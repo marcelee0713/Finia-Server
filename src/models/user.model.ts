@@ -75,11 +75,11 @@ export class User implements IUser {
     const _usernameRegex = /^[a-zA-Z]{2}[a-zA-Z0-9]*$/;
 
     if (this._username.length < minLength || this._username.length > maxLength) {
-      throw new Error("invalid-_username");
+      throw new Error("invalid-username");
     }
 
     if (!_usernameRegex.test(this._username)) {
-      throw new Error("invalid-_username");
+      throw new Error("invalid-username");
     }
   }
 
@@ -88,11 +88,11 @@ export class User implements IUser {
     const _passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
 
     if (this._password.length < minLength) {
-      throw new Error("invalid-_password");
+      throw new Error("invalid-password");
     }
 
     if (!_passwordRegex.test(this._password)) {
-      throw new Error("invalid-_password");
+      throw new Error("invalid-password");
     }
   }
 
@@ -100,7 +100,7 @@ export class User implements IUser {
     const _emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!_emailRegex.test(this._email)) {
-      throw new Error("invalid-_email");
+      throw new Error("invalid-email");
     }
   }
 

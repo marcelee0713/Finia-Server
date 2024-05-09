@@ -80,24 +80,6 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async getUid(username: string, password: string): Promise<string> {
-    const res = await this.prismaClient.user.findUnique({
-      where: {
-        username: username,
-      },
-    });
-
-    if (res === null) throw new Error("user-does-not-exist");
-
-    const isMatch = await bcrypt.compare(password, res.password);
-
-    if (!isMatch) throw new Error("wrong-credentials");
-
-    if (!res.emailVerified) throw new Error("unverified-email");
-
-    return res.uid;
-  }
-
   async setSession(uid: string, setId: string, refreshToken: string): Promise<void> {
     const redis: RedisClientType = await redisClient();
 
@@ -182,10 +164,8 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async verifyEmail(uid: string, email: string, emailFromReq: string): Promise<void> {
+  async verifyEmail(uid: string, email: string): Promise<void> {
     try {
-      if (email !== emailFromReq) throw new Error("email-dev-req-error");
-
       const user = await this.prismaClient.user.findFirst({
         where: {
           uid: uid,
@@ -196,7 +176,7 @@ export class UserRepository implements IUserRepository {
 
       if (user.emailVerified) throw new Error("user-already-verified");
 
-      if (user.email !== emailFromReq) throw new Error("email-dev-error");
+      if (user.email !== email) throw new Error("email-dev-error");
 
       await this.prismaClient.user.update({
         where: {

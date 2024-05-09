@@ -21,26 +21,20 @@ export class UserService implements IUserServiceInteractor {
     this.userEntity = new User("", "", "", null, "", "", null);
   }
 
-  async verifyEmailAddress(uid: string, email: string, token: string): Promise<void> {
+  async verifyEmailAddress(token: string): Promise<void> {
     try {
-      this.userEntity.setEmail(email);
-
-      this.userEntity.validateEmail();
-
       const payload = this.auth.getPayload({
         token: token,
         tokenType: "EMAIL",
       }) as EmailAndResetPayloadType;
 
-      if (uid !== payload.uid) throw new Error("uid-mismatch");
-
-      const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(uid, token);
+      const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(payload.uid, token);
 
       if (isTokenBlacklisted) throw new Error("blacklisted-token");
 
-      await this.repository.verifyEmail(payload.uid, payload.email, email);
+      await this.repository.verifyEmail(payload.uid, payload.email);
 
-      await this.repository.addTokenToBlacklist(uid, token);
+      await this.repository.addTokenToBlacklist(payload.uid, token);
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

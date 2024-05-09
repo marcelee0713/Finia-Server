@@ -1,11 +1,23 @@
-interface errorObject {
+import { z } from "zod";
+
+interface ErrorObject {
   status: string;
   message: string;
   type: string;
 }
 
-export const handleError = (err: Error): errorObject => {
-  const errObj: errorObject = {
+interface ErrorReqStack {
+  errors: ErrorReqBody[];
+  code?: "400";
+}
+interface ErrorReqBody {
+  message: string;
+  type: string;
+  at: (string | number)[];
+}
+
+export const handleError = (err: Error): ErrorObject => {
+  const errObj: ErrorObject = {
     message: "Internal server error",
     status: "500",
     type: err.message,
@@ -114,4 +126,23 @@ export const handleError = (err: Error): errorObject => {
     default:
       return errObj;
   }
+};
+
+export const handleBodyErr = (err: z.ZodError): ErrorReqStack => {
+  const errorReqStack: ErrorReqStack = {
+    errors: [],
+    code: "400",
+  };
+
+  err.issues.forEach((val) => {
+    const error: ErrorReqBody = {
+      message: val.message,
+      type: val.code,
+      at: val.path,
+    };
+
+    errorReqStack.errors.push(error);
+  });
+
+  return errorReqStack;
 };
