@@ -5,6 +5,7 @@ import { RedisClientType, redisClient } from "../db/redis";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { UserParams } from "../types/user.types";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -24,16 +25,16 @@ export class UserRepository implements IUserRepository {
         },
       });
 
-      if (user === null) throw new Error("user-does-not-exist");
+      if (user === null) throw new Error("user-does-not-exist" as ErrorType);
 
       if (data.password && data.useCases.includes("LOGIN")) {
         const isMatch = await bcrypt.compare(data.password, user.password);
 
-        if (!isMatch) throw new Error("wrong-credentials");
+        if (!isMatch) throw new Error("wrong-credentials" as ErrorType);
       }
 
       if (data.useCases.includes("VERIFY_EMAIL")) {
-        if (!user.emailVerified) throw new Error("unverified-email");
+        if (!user.emailVerified) throw new Error("unverified-email" as ErrorType);
       }
 
       return {
@@ -48,7 +49,7 @@ export class UserRepository implements IUserRepository {
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2001") {
-          throw new Error("user-does-not-exist");
+          throw new Error("user-does-not-exist" as ErrorType);
         }
       }
 
@@ -72,7 +73,7 @@ export class UserRepository implements IUserRepository {
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2002") {
-          throw new Error("user-already-exist");
+          throw new Error("user-already-exist" as ErrorType);
         }
       }
 
@@ -128,7 +129,7 @@ export class UserRepository implements IUserRepository {
 
       const keyExistence = await redis.KEYS(`${key}*`);
 
-      if (keyExistence.length === 0) throw new Error("not-authorized");
+      if (keyExistence.length === 0) throw new Error("not-authorized" as ErrorType);
 
       const sessionKey = keyExistence[0];
 
@@ -153,7 +154,7 @@ export class UserRepository implements IUserRepository {
         isNotOnTheList = true;
       }
 
-      if (isNotOnTheList) throw new Error("not-authorized");
+      if (isNotOnTheList) throw new Error("not-authorized" as ErrorType);
 
       return refreshToken;
     } catch (err) {
@@ -172,11 +173,11 @@ export class UserRepository implements IUserRepository {
         },
       });
 
-      if (!user) throw new Error("user-does-not-exist");
+      if (!user) throw new Error("user-does-not-exist" as ErrorType);
 
-      if (user.emailVerified) throw new Error("user-already-verified");
+      if (user.emailVerified) throw new Error("user-already-verified" as ErrorType);
 
-      if (user.email !== email) throw new Error("email-dev-error");
+      if (user.email !== email) throw new Error("email-dev-error" as ErrorType);
 
       await this.prismaClient.user.update({
         where: {
@@ -261,9 +262,9 @@ export class UserRepository implements IUserRepository {
         },
       });
 
-      if (!user) throw new Error("user-does-not-exist");
+      if (!user) throw new Error("user-does-not-exist" as ErrorType);
 
-      if (!user.emailVerified) throw new Error("unverified-email");
+      if (!user.emailVerified) throw new Error("unverified-email" as ErrorType);
 
       return user.password;
     } catch (err) {
@@ -280,13 +281,13 @@ export class UserRepository implements IUserRepository {
         },
       });
 
-      if (!user) throw new Error("user-does-not-exist");
+      if (!user) throw new Error("user-does-not-exist" as ErrorType);
 
-      if (!user.emailVerified) throw new Error("unverified-email");
+      if (!user.emailVerified) throw new Error("unverified-email" as ErrorType);
 
       const isTheSame = await bcrypt.compare(newPassword, user.password);
 
-      if (isTheSame) throw new Error("same-password-reset-request");
+      if (isTheSame) throw new Error("same-password-reset-request" as ErrorType);
 
       await this.prismaClient.user.update({
         where: {

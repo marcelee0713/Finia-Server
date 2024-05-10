@@ -26,7 +26,7 @@ import {
   emailAndPasswordVerificationRequestRateLimit,
   loginAndOutRateLimit,
   passwordModificationRateLimit,
-} from "../middlewares/rate.limit";
+} from "../middlewares/rate-limiter/user.rate.limit";
 
 export const container = new Container();
 container.bind<IUserRepository>(INTERFACE_TYPE.UserRepository).to(UserRepository);

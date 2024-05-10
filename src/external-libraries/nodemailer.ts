@@ -5,6 +5,7 @@ import { DEFAULT_EMAIL_CONTENT, DEFAULT_RESET_PASS_CONTENT, INTERFACE_TYPE } fro
 import { inject, injectable } from "inversify";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { EmailAndResetPayloadType } from "../types/jwt.types";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class EmailServices implements IEmailService {
@@ -57,7 +58,7 @@ export class EmailServices implements IEmailService {
         throw new Error(err.message);
       }
 
-      throw new Error("email-service-error");
+      throw new Error("email-service-error" as ErrorType);
     }
   }
 

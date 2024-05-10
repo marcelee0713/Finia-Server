@@ -4,6 +4,7 @@ import { handleError } from "../utils/error-handler";
 import { inject, injectable } from "inversify";
 import { INTERFACE_TYPE } from "../utils";
 import { IEmailService } from "../interfaces/nodemailer.interface";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class UserController {
@@ -31,7 +32,7 @@ export class UserController {
       return res.status(200).json({ res: "Successfully created a user!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -61,7 +62,7 @@ export class UserController {
         .json({ token: accessToken });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -81,7 +82,7 @@ export class UserController {
       return res.clearCookie("token").status(200).json({ res: "Successfully logged out user" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -102,7 +103,7 @@ export class UserController {
       res.status(200).json({ res: "Successfully requested an email verification!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -120,7 +121,7 @@ export class UserController {
       return res.status(200).json({ res: "Successfully verified your email address!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -140,7 +141,7 @@ export class UserController {
       return res.status(200).json({ res: "We have sent a reset password to your email address!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -159,7 +160,7 @@ export class UserController {
       return res.status(200).json({ res: "Successfully reset your password!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -178,7 +179,7 @@ export class UserController {
       return res.status(200).json({ res: "Successfully reset your password!" });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -198,7 +199,7 @@ export class UserController {
       return res.status(200).json({ res: password });
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }

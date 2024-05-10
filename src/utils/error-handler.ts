@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { ErrorType } from "../types/error.types";
 
 interface ErrorObject {
   status: string;
   message: string;
-  type: string;
+  type: ErrorType;
 }
 
 interface ErrorReqStack {
@@ -16,14 +17,14 @@ interface ErrorReqBody {
   at: (string | number)[];
 }
 
-export const handleError = (err: Error): ErrorObject => {
+export const handleError = (err: ErrorType): ErrorObject => {
   const errObj: ErrorObject = {
     message: "Internal server error",
     status: "500",
-    type: err.message,
+    type: "internal-server-error",
   };
 
-  switch (err.message) {
+  switch (err) {
     case "user-already-exist":
       errObj.message = "User already exist!";
       errObj.status = "409";
@@ -44,6 +45,22 @@ export const handleError = (err: Error): ErrorObject => {
       errObj.status = "404";
       return errObj;
 
+    case "invalid-amount":
+      errObj.message =
+        "Invalid amount, please enter a number with 12 digits and 2 decimal places only!";
+      errObj.status = "400";
+      return errObj;
+
+    case "invalid-transaction-type":
+      errObj.message = "Transaction type should either be REVENUE or EXPENSES!";
+      errObj.status = "400";
+      return errObj;
+
+    case "invalid-note":
+      errObj.message = "Transaction Notes should be less than 255 characters!";
+      errObj.status = "400";
+      return errObj;
+
     case "invalid-request":
       errObj.message = "Bad request, no data in the body provided!";
       errObj.status = "400";
@@ -61,6 +78,11 @@ export const handleError = (err: Error): ErrorObject => {
 
     case "invalid-email":
       errObj.message = "Email is not valid, please follow the format!";
+      errObj.status = "400";
+      return errObj;
+
+    case "category-does-not-exist":
+      errObj.message = "Category does not exist!";
       errObj.status = "400";
       return errObj;
 

@@ -1,4 +1,5 @@
 import { IUser } from "../interfaces/user.interface";
+import { ErrorType } from "../types/error.types";
 
 export class User implements IUser {
   _uid: string;
@@ -75,11 +76,11 @@ export class User implements IUser {
     const _usernameRegex = /^[a-zA-Z]{2}[a-zA-Z0-9]*$/;
 
     if (this._username.length < minLength || this._username.length > maxLength) {
-      throw new Error("invalid-username");
+      throw new Error("invalid-username" as ErrorType);
     }
 
     if (!_usernameRegex.test(this._username)) {
-      throw new Error("invalid-username");
+      throw new Error("invalid-username" as ErrorType);
     }
   }
 
@@ -88,11 +89,11 @@ export class User implements IUser {
     const _passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
 
     if (this._password.length < minLength) {
-      throw new Error("invalid-password");
+      throw new Error("invalid-password" as ErrorType);
     }
 
     if (!_passwordRegex.test(this._password)) {
-      throw new Error("invalid-password");
+      throw new Error("invalid-password" as ErrorType);
     }
   }
 
@@ -100,7 +101,7 @@ export class User implements IUser {
     const _emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!_emailRegex.test(this._email)) {
-      throw new Error("invalid-email");
+      throw new Error("invalid-email" as ErrorType);
     }
   }
 

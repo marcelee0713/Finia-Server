@@ -5,6 +5,7 @@ import { IJWTService } from "../interfaces/jwt.interface";
 import { inject, injectable } from "inversify";
 import { INTERFACE_TYPE } from "../utils/appConst";
 import { PayloadType } from "../types/jwt.types";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class UserMiddlewares {
@@ -23,7 +24,7 @@ export class UserMiddlewares {
     try {
       const accessToken = req.cookies.token;
 
-      if (accessToken === undefined) throw new Error("not-authorized");
+      if (accessToken === undefined) throw new Error("not-authorized" as ErrorType);
 
       const payload = this.jwt.getPayload({
         token: accessToken,
@@ -51,7 +52,7 @@ export class UserMiddlewares {
       return next();
     } catch (err) {
       if (err instanceof Error) {
-        const errObj = handleError(err);
+        const errObj = handleError(err.message as ErrorType);
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }

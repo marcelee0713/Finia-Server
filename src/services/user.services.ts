@@ -5,6 +5,7 @@ import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
 import { EmailAndResetPayloadType, PayloadType } from "../types/jwt.types";
 import { User } from "../models/user.model";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
@@ -30,7 +31,7 @@ export class UserService implements IUserServiceInteractor {
 
       const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(payload.uid, token);
 
-      if (isTokenBlacklisted) throw new Error("blacklisted-token");
+      if (isTokenBlacklisted) throw new Error("blacklisted-token" as ErrorType);
 
       await this.repository.verifyEmail(payload.uid, payload.email);
 
@@ -54,12 +55,12 @@ export class UserService implements IUserServiceInteractor {
         email: "",
       };
 
-      if (!username && !token) throw new Error("invalid-request");
+      if (!username && !token) throw new Error("invalid-request" as ErrorType);
 
       if (username && !token) {
         const data = await this.repository.getUserData({ username, useCases: ["DEFAULT"] });
 
-        if (data._emailVerified) throw new Error("user-already-verified");
+        if (data._emailVerified) throw new Error("user-already-verified" as ErrorType);
 
         user = {
           email: data._email,
@@ -76,7 +77,7 @@ export class UserService implements IUserServiceInteractor {
 
       const data = await this.repository.getUserData({ ...user, useCases: ["DEFAULT"] });
 
-      if (data._emailVerified) throw new Error("user-already-verified");
+      if (data._emailVerified) throw new Error("user-already-verified" as ErrorType);
 
       return user;
     } catch (err) {
@@ -179,7 +180,7 @@ export class UserService implements IUserServiceInteractor {
 
       const isTokenBlacklisted = await this.repository.checkTokenInBlacklist(payload.uid, token);
 
-      if (isTokenBlacklisted) throw new Error("blacklisted-token");
+      if (isTokenBlacklisted) throw new Error("blacklisted-token" as ErrorType);
 
       await this.repository.changePassword(payload.uid, newPassword);
 

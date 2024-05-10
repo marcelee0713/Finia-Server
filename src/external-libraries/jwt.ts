@@ -8,6 +8,7 @@ import {
 } from "../types/jwt.types";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { injectable } from "inversify";
+import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class JWTServices implements IJWTService {
@@ -54,11 +55,11 @@ export class JWTServices implements IJWTService {
 
       return payload;
     } catch (err) {
-      if (tokenType === "REFRESH") throw new Error("not-authorized");
+      if (tokenType === "REFRESH") throw new Error("not-authorized" as ErrorType);
 
-      if (tokenType === "EMAIL") throw new Error("invalid-email-verification");
+      if (tokenType === "EMAIL") throw new Error("invalid-email-verification" as ErrorType);
 
-      if (tokenType === "PASSRESET") throw new Error("invalid-password-reset-request");
+      if (tokenType === "PASSRESET") throw new Error("invalid-password-reset-request" as ErrorType);
 
       const payload = this.jwtClient.decode(token) as PayloadType;
 

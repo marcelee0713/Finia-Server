@@ -3,6 +3,10 @@ export const INTERFACE_TYPE = {
   UserService: Symbol.for("UserInteractor"),
   UserController: Symbol.for("UserController"),
   UserMiddlewares: Symbol.for("UserMiddlewares"),
+  TransactionRepository: Symbol.for("TransactionRepository"),
+  TransactionService: Symbol.for("TransactionService"),
+  TransactionController: Symbol.for("TransactionController"),
+  TransactionEntity: Symbol.for("TransactionEntity"),
   JWTServices: Symbol.for("JWTServices"),
   EmailServices: Symbol.for("EmailServices"),
 };
