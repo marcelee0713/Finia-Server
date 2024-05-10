@@ -21,7 +21,7 @@ export const handleError = (err: ErrorType): ErrorObject => {
   const errObj: ErrorObject = {
     message: "Internal server error",
     status: "500",
-    type: "internal-server-error",
+    type: err,
   };
 
   switch (err) {
@@ -57,7 +57,7 @@ export const handleError = (err: ErrorType): ErrorObject => {
       return errObj;
 
     case "invalid-note":
-      errObj.message = "Transaction Notes should be less than 255 characters!";
+      errObj.message = "Transaction notes should be less than 255 characters!";
       errObj.status = "400";
       return errObj;
 
@@ -81,9 +81,14 @@ export const handleError = (err: ErrorType): ErrorObject => {
       errObj.status = "400";
       return errObj;
 
+    case "transaction-does-not-exist":
+      errObj.message = "Transaction does not exist!";
+      errObj.status = "404";
+      return errObj;
+
     case "category-does-not-exist":
       errObj.message = "Category does not exist!";
-      errObj.status = "400";
+      errObj.status = "404";
       return errObj;
 
     case "uid-mismatch":
@@ -146,6 +151,7 @@ export const handleError = (err: ErrorType): ErrorObject => {
       return errObj;
 
     default:
+      errObj.type = "internal-server-error";
       return errObj;
   }
 };

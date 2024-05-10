@@ -18,4 +18,4 @@ app.use(express.json());
 app.listen(PORT);
 
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/transaction", transactionRouter);
+app.use("/api/v1/transactions", transactionRouter);

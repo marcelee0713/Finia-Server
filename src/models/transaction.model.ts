@@ -83,7 +83,7 @@ export class Transaction implements ITransaction {
     const wholeNumbers = numbers[0];
     const decimalPlaces = numbers[1];
 
-    if (wholeNumbers.length > 12 || decimalPlaces.length > 2) {
+    if (wholeNumbers.length > 12 || (decimalPlaces && decimalPlaces.length > 2)) {
       throw new Error("invalid-amount");
     }
   }

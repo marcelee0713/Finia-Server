@@ -15,6 +15,7 @@ export type ErrorType =
   | "email-service-error"
   | "email-dev-error"
   | "email-dev-req-error"
+  | "transaction-does-not-exist"
   | "category-does-not-exist"
   | "uid-mismatch"
   | "same-password-reset-request"

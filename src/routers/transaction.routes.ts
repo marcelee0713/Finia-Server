@@ -1,7 +1,6 @@
 import express from "express";
 import { Container } from "inversify";
 import { INTERFACE_TYPE } from "../utils";
-import { UserMiddlewares } from "../middlewares/user.middleware";
 import { TransactionController } from "../controllers/transaction.controller";
 import {
   ITransaction,
@@ -22,6 +21,7 @@ import {
   transactionReadRateLimit,
 } from "../middlewares/rate-limiter/transaction.rate.limit";
 import { Transaction } from "../models/transaction.model";
+import { middleware } from "./user.routes";
 
 export const container = new Container();
 
@@ -34,13 +34,12 @@ container
 container
   .bind<ITransactionServiceInteractor>(INTERFACE_TYPE.TransactionService)
   .to(TransactionService);
+
 container.bind(INTERFACE_TYPE.TransactionController).to(TransactionController);
 
 const transactionRouter = express.Router();
 
 const controller = container.get<TransactionController>(INTERFACE_TYPE.TransactionController);
-
-const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
 
 transactionRouter
   .route("/")

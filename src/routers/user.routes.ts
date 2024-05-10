@@ -39,7 +39,7 @@ container.bind<IEmailService>(INTERFACE_TYPE.EmailServices).to(EmailServices);
 const userRouter = express.Router();
 
 const controller = container.get<UserController>(INTERFACE_TYPE.UserController);
-const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
+export const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
 
 userRouter.post(
   "/create",

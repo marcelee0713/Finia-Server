@@ -5,7 +5,7 @@ import { app } from "../..";
 export const UserRegistrationTestSuite = () => {
   const body = {
     username: "johnny123",
-    email: "john@example.com",
+    email: "johnny123@example.com",
     password: "P@ssword123",
   };
 

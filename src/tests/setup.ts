@@ -17,13 +17,42 @@ export const GetUserTest = async (username: string) => {
 export const CreateUserTest = async () => {
   const body = {
     username: "johnny123",
-    email: "john@example.com",
+    email: "johnny@example.com",
     password: await bcrypt.hash("P@ssword123", 10),
   };
 
   return await db.user.create({
     data: body,
   });
+};
+
+export const GetUID = async (username: string): Promise<string> => {
+  const res = await db.user.findFirst({
+    where: {
+      username: username,
+    },
+    select: {
+      uid: true,
+    },
+  });
+
+  if (!res) throw new Error("User does not exist");
+
+  return res.uid;
+};
+
+export const GetTransasctionUID = async (username: string): Promise<string> => {
+  const res = await db.transactions.findFirst({
+    where: {
+      user: {
+        username: username,
+      },
+    },
+  });
+
+  if (!res) throw new Error("User does not have any transactions");
+
+  return res.uid;
 };
 
 export const DatabaseTearDown = async () => {

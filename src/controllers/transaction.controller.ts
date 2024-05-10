@@ -10,7 +10,7 @@ export class TransactionController {
   private interactor: ITransactionServiceInteractor;
 
   constructor(
-    @inject(INTERFACE_TYPE.TransactionController) interactor: ITransactionServiceInteractor
+    @inject(INTERFACE_TYPE.TransactionService) interactor: ITransactionServiceInteractor
   ) {
     this.interactor = interactor;
   }

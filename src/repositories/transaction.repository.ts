@@ -5,7 +5,7 @@ import {
   TransactionObject,
 } from "../interfaces/transaction.interface";
 import { TransactionTypes } from "../types/transaction.types";
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { ErrorType } from "../types/error.types";
 
@@ -62,16 +62,57 @@ export class TransactionRepository implements ITransactionRepository {
     category?: string
   ): Promise<TransactionObject[]> {
     let list: TransactionObject[] = [];
+    let transactions = [];
     try {
-      const transactions = await this.prismaClient.transactions.findMany({
-        where: {
-          user_id: userId,
-          type: type && type,
-          categories: {
+      const _category =
+        category &&
+        (await this.prismaClient.categories.findFirst({
+          where: {
             category: category,
           },
-        },
-      });
+        }));
+
+      if (category && !_category) {
+        throw new Error("category-does-not-exist" as ErrorType);
+      }
+
+      if (type && _category) {
+        transactions = await this.prismaClient.transactions.findMany({
+          where: {
+            user_id: userId,
+            type: type,
+            category_id: _category.uid,
+            categories: {
+              uid: _category.uid,
+              category: category,
+            },
+          },
+        });
+      } else if (type && !category) {
+        transactions = await this.prismaClient.transactions.findMany({
+          where: {
+            user_id: userId,
+            type: type,
+          },
+        });
+      } else if (!type && _category) {
+        transactions = await this.prismaClient.transactions.findMany({
+          where: {
+            user_id: userId,
+            category_id: _category.uid,
+            categories: {
+              uid: _category.uid,
+              category: category,
+            },
+          },
+        });
+      } else {
+        transactions = await this.prismaClient.transactions.findMany({
+          where: {
+            user_id: userId,
+          },
+        });
+      }
 
       transactions.forEach((val) => {
         list.push({
@@ -87,6 +128,7 @@ export class TransactionRepository implements ITransactionRepository {
 
       return list;
     } catch (err) {
+      if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
     }
   }
@@ -108,13 +150,24 @@ export class TransactionRepository implements ITransactionRepository {
 
       if (!user) throw new Error("user-does-not-exist" as ErrorType);
 
-      const _category = await this.prismaClient.categories.findFirst({
+      const transaction = await this.prismaClient.transactions.findFirst({
         where: {
-          category: category,
+          uid: uid,
+          user_id: userId,
         },
       });
 
-      if (!_category) throw new Error("category-does-not-exist" as ErrorType);
+      if (!transaction) throw new Error("transaction-does-not-exist" as ErrorType);
+
+      const _category =
+        category &&
+        (await this.prismaClient.categories.findFirst({
+          where: {
+            category: category,
+          },
+        }));
+
+      if (category && !_category) throw new Error("category-does-not-exist" as ErrorType);
 
       await this.prismaClient.transactions.update({
         where: {
@@ -122,10 +175,10 @@ export class TransactionRepository implements ITransactionRepository {
           user_id: user.uid,
         },
         data: {
-          amount: amount && amount,
-          type: type && type,
-          category_id: _category.uid,
-          note: note && note,
+          amount: amount ?? transaction.amount,
+          type: type ?? transaction.type,
+          category_id: _category ? _category.uid : transaction.category_id,
+          note: note ?? transaction.note,
         },
       });
     } catch (err) {
@@ -151,6 +204,11 @@ export class TransactionRepository implements ITransactionRepository {
         },
       });
     } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === "P2025") {
+          throw new Error("transaction-does-not-exist" as ErrorType);
+        }
+      }
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
     }
