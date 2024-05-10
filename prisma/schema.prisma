@@ -30,7 +30,7 @@ model transactions {
   user_id     String
   categories  categories      @relation(fields: [category_id], references: [uid])
   category_id String
-  amount      String          @db.String(11)
+  amount      Decimal         @db.Decimal(12, 2)
   type        transactionType
   note        String?         @db.String(255)
   created_at  DateTime        @default(now())

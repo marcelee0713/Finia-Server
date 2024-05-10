@@ -30,6 +30,9 @@
     "reflect-metadata": "^0.2.2",
     "zod": "^3.22.4"
   },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} src/seed.ts"
+  },
   "devDependencies": {
     "@babel/core": "^7.24.5",
     "@babel/preset-env": "^7.24.5",
