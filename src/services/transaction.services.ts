@@ -45,12 +45,20 @@ export class TransactionService implements ITransactionServiceInteractor {
     userId: string,
     type?: string,
     category?: string,
-    useCase?: string
+    useCase?: string,
+    skip?: string,
+    take?: string
   ): Promise<TransactionReturnType<TransactionUseCases>> {
     try {
       if (type) this.entity.validateType(type);
 
-      const transactions = await this.repository.get(userId, type as TransactionTypes, category);
+      const transactions = await this.repository.get(
+        userId,
+        type as TransactionTypes,
+        category,
+        skip ? parseInt(skip) : undefined,
+        take ? parseInt(take) : undefined
+      );
 
       const object = this.entity.dto(transactions, useCase);
 

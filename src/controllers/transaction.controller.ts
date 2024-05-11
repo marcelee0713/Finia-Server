@@ -43,8 +43,17 @@ export class TransactionController {
       const type = req.body.type;
       const category = req.body.category;
       const useCase = req.body.useCase;
+      const skip = req.body.skip;
+      const take = req.body.take;
 
-      const transactions = await this.interactor.getTransactions(userId, type, category, useCase);
+      const transactions = await this.interactor.getTransactions(
+        userId,
+        type,
+        category,
+        useCase,
+        skip,
+        take
+      );
 
       return res.status(transactions ? 200 : 204).json(transactions ?? {});
     } catch (err) {

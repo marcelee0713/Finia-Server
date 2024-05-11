@@ -16,6 +16,8 @@ export const getSchema = z.object({
     type: z.string().toUpperCase().trim().optional(),
     category: z.string().trim().optional(),
     useCase: z.string().trim().optional(),
+    skip: z.string().trim().optional(),
+    take: z.string().trim().optional(),
   }),
 });
 

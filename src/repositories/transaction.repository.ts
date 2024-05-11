@@ -32,6 +32,7 @@ export class TransactionRepository implements ITransactionRepository {
       const _category = await this.prismaClient.categories.findFirst({
         where: {
           category: category,
+          transaction_type: type,
         },
       });
 
@@ -55,7 +56,9 @@ export class TransactionRepository implements ITransactionRepository {
   async get(
     userId: string,
     type?: TransactionTypes,
-    category?: string
+    category?: string,
+    skip?: number,
+    take?: number
   ): Promise<TransactionData[]> {
     let list: TransactionData[] = [];
     let transactions = [];
@@ -90,6 +93,11 @@ export class TransactionRepository implements ITransactionRepository {
               },
             },
           },
+          skip: skip,
+          take: take,
+          orderBy: {
+            created_at: "asc",
+          },
         });
       } else if (type && !category) {
         transactions = await this.prismaClient.transactions.findMany({
@@ -103,6 +111,11 @@ export class TransactionRepository implements ITransactionRepository {
                 category: true,
               },
             },
+          },
+          skip: skip,
+          take: take,
+          orderBy: {
+            created_at: "asc",
           },
         });
       } else if (!type && _category) {
@@ -122,6 +135,11 @@ export class TransactionRepository implements ITransactionRepository {
               },
             },
           },
+          skip: skip,
+          take: take,
+          orderBy: {
+            created_at: "asc",
+          },
         });
       } else {
         transactions = await this.prismaClient.transactions.findMany({
@@ -134,6 +152,11 @@ export class TransactionRepository implements ITransactionRepository {
                 category: true,
               },
             },
+          },
+          skip: skip,
+          take: take,
+          orderBy: {
+            created_at: "asc",
           },
         });
       }

@@ -265,7 +265,12 @@ export class Transaction implements ITransaction {
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     if (data.length === 0) return undefined;
-    let transaction: TransactionInfo | undefined;
+
+    const transaction: TransactionInfo | undefined = {
+      userId: "",
+      useCase: useCase,
+      info: "",
+    };
 
     let totalExpenses = 0;
 
@@ -279,14 +284,11 @@ export class Transaction implements ITransaction {
       }
     });
 
-    transaction = {
-      useCase: useCase,
-      userId: userId,
-      info: "Total expenses all time",
-      amount: totalExpenses.toString(),
-    };
+    transaction.userId = userId;
+    transaction.info = "Total expenses all time";
+    transaction.amount = totalExpenses.toString();
 
-    return totalExpenses !== 0 ? transaction : undefined;
+    return totalExpenses > 0 ? transaction : undefined;
   };
 
   totalTransactionThisDay = (
@@ -294,20 +296,21 @@ export class Transaction implements ITransaction {
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
+
     const date = new Date();
-    let count = 0;
 
     const map = new Map<string, number>();
 
+    let userId = "";
+
     data.forEach((val) => {
+      userId = val.userId;
       const conditionMet =
         val.createdAt.getDate() === date.getDate() &&
         val.createdAt.getMonth() === date.getMonth() &&
         val.createdAt.getFullYear() === date.getFullYear();
 
       if (conditionMet) {
-        count++;
-
         if (!map.has(val.categoryName)) {
           map.set(val.categoryName, 1);
         } else {
@@ -328,9 +331,9 @@ export class Transaction implements ITransaction {
         highestCategoryCount = count;
 
         transaction = {
-          userId: this.getUserId(),
+          userId: userId,
           useCase: useCase,
-          info: `${count} Transactions this day`,
+          info: `${map.size} Transactions this day`,
           subInfo: `It was ${category}`,
         };
       }
@@ -343,13 +346,22 @@ export class Transaction implements ITransaction {
     data: TransactionData[],
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    let transaction: TransactionInfo | undefined;
+    const transaction: TransactionInfo | undefined = {
+      info: "",
+      useCase: useCase,
+      userId: "",
+    };
+
+    let userId = "";
+
     const date = new Date();
+
     let count = 0;
 
     const map = new Map<string, number>();
 
     data.forEach((val) => {
+      userId = val.userId;
       const conditionMet =
         val.createdAt.getMonth() === date.getMonth() &&
         val.createdAt.getFullYear() === date.getFullYear();
@@ -370,12 +382,9 @@ export class Transaction implements ITransaction {
       }
     });
 
-    transaction = {
-      userId: this.getUserId(),
-      useCase: useCase,
-      info: `${count} Transactions this month`,
-      subInfo: `Current month is ${date.getMonth()}`,
-    };
+    transaction.userId = userId;
+    transaction.info = `${count} Transactions this month`;
+    transaction.subInfo = `Current month is ${date.getMonth()}`;
 
     return count > 0 ? transaction : undefined;
   };
@@ -384,11 +393,17 @@ export class Transaction implements ITransaction {
     data: TransactionData[],
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    let transaction: TransactionInfo | undefined;
-    const date = new Date();
-    let count = 0;
+    const transaction: TransactionInfo | undefined = {
+      info: "",
+      useCase: useCase,
+      userId: "",
+    };
 
-    const map = new Map<string, number>();
+    const date = new Date();
+
+    let totalExpenses = 0;
+
+    let userId = "";
 
     data.forEach((val) => {
       const conditionMet =
@@ -396,29 +411,24 @@ export class Transaction implements ITransaction {
         val.createdAt.getFullYear() === date.getFullYear();
 
       if (conditionMet) {
-        count++;
+        userId = val.userId;
 
-        if (!map.has(val.categoryName)) {
-          map.set(val.categoryName, 1);
-        } else {
-          const transactionCount = map.get(val.categoryName);
-
-          if (transactionCount) {
-            const newCount = transactionCount + 1;
-            map.set(val.categoryName, newCount);
-          }
+        if (val.type === "EXPENSES") {
+          totalExpenses = parseInt(val.amount) + totalExpenses;
         }
       }
     });
 
-    transaction = {
-      userId: this.getUserId(),
-      useCase: useCase,
-      info: `${count} Transactions this month`,
-      subInfo: `Current month is ${date.getMonth()}`,
-    };
+    const currentMonth = date.toLocaleDateString("en-US", {
+      month: "long",
+    });
 
-    return count > 0 ? transaction : undefined;
+    transaction.userId = userId;
+    transaction.info = "Total expenses this month";
+    transaction.amount = totalExpenses.toString();
+    transaction.subInfo = `Current month is ${currentMonth}`;
+
+    return totalExpenses > 0 ? transaction : undefined;
   };
 
   netIncome = (
@@ -426,7 +436,11 @@ export class Transaction implements ITransaction {
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     if (data.length === 0) return undefined;
-    let transaction: TransactionInfo | undefined;
+    const transaction: TransactionInfo | undefined = {
+      info: "",
+      useCase: useCase,
+      userId: "",
+    };
 
     let totalExpenses = 0;
 
@@ -444,12 +458,9 @@ export class Transaction implements ITransaction {
 
     const netIncome = totalRevenue - totalExpenses;
 
-    transaction = {
-      useCase: useCase,
-      userId: userId,
-      info: "Net Income",
-      amount: netIncome.toString(),
-    };
+    transaction.userId = userId;
+    transaction.info = "Net Income";
+    transaction.amount = netIncome.toString();
 
     return netIncome ? transaction : undefined;
   };
@@ -484,6 +495,7 @@ export class Transaction implements ITransaction {
     map.forEach((amount, thisDate) => {
       if (amount > highestCount) {
         highestCount = amount;
+
         const formattedDate = thisDate.toLocaleDateString("en-US", {
           month: "short",
           day: "2-digit",
@@ -573,8 +585,6 @@ export class Transaction implements ITransaction {
     type: TransactionTypes,
     useCase: TransactionUseCases
   ): CategoryTransactions | undefined => {
-    let userId = "";
-
     const map = new Map<string, TotalAmountInCategory>();
 
     const categoryTransactions: CategoryTransactions = {
@@ -584,7 +594,6 @@ export class Transaction implements ITransaction {
     };
 
     data.forEach((transaction) => {
-      userId = transaction.userId;
       if (!map.has(transaction.categoryName) && transaction.type === type) {
         const obj: TotalAmountInCategory = {
           categoryName: transaction.categoryName,

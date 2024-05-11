@@ -2,12 +2,10 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
-import jest from "eslint-plugin-jest";
 
 export default [
   eslintConfigPrettier,
   pluginJs.configs.recommended,
-  jest.configs.recommended,
   ...tseslint.configs.recommended,
 
   {

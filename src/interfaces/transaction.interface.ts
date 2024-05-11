@@ -181,7 +181,9 @@ export interface ITransactionServiceInteractor {
     userId: string,
     type?: string,
     category?: string,
-    useCase?: string
+    useCase?: string,
+    skip?: string,
+    take?: string
   ): Promise<TransactionReturnType<TransactionUseCases>>;
 
   updateTransaction(
@@ -205,7 +207,13 @@ export interface ITransactionRepository {
     note?: string
   ): Promise<void>;
 
-  get(userId: string, type?: TransactionTypes, category?: string): Promise<TransactionData[]>;
+  get(
+    userId: string,
+    type?: TransactionTypes,
+    category?: string,
+    skip?: number,
+    take?: number
+  ): Promise<TransactionData[]>;
 
   update(
     uid: string,
