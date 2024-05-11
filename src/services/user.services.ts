@@ -1,25 +1,25 @@
 import { inject, injectable } from "inversify";
-import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.interface";
+import { IUser, IUserRepository, IUserServiceInteractor } from "../interfaces/user.interface";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
 import { EmailAndResetPayloadType, PayloadType } from "../types/jwt.types";
-import { User } from "../models/user.model";
 import { ErrorType } from "../types/error.types";
 
 @injectable()
 export class UserService implements IUserServiceInteractor {
   private repository: IUserRepository;
   private auth: IJWTService;
-  private userEntity: User;
+  private entity: IUser;
 
   constructor(
     @inject(INTERFACE_TYPE.UserRepository) repository: IUserRepository,
-    @inject(INTERFACE_TYPE.JWTServices) auth: IJWTService
+    @inject(INTERFACE_TYPE.JWTServices) auth: IJWTService,
+    @inject(INTERFACE_TYPE.UserEntity) entity: IUser
   ) {
     this.auth = auth;
     this.repository = repository;
-    this.userEntity = new User("", "", "", null, "", "", null);
+    this.entity = entity;
   }
 
   async verifyEmailAddress(token: string): Promise<void> {
@@ -60,12 +60,14 @@ export class UserService implements IUserServiceInteractor {
       if (username && !token) {
         const data = await this.repository.getUserData({ username, useCases: ["DEFAULT"] });
 
-        if (data._emailVerified) throw new Error("user-already-verified" as ErrorType);
+        if (data.emailVerified) throw new Error("user-already-verified" as ErrorType);
 
         user = {
-          email: data._email,
-          uid: data._uid,
+          email: data.email,
+          uid: data.uid,
         };
+
+        return user;
       } else {
         const payload = this.auth.getDecodedPayload({
           token: token,
@@ -77,7 +79,7 @@ export class UserService implements IUserServiceInteractor {
 
       const data = await this.repository.getUserData({ ...user, useCases: ["DEFAULT"] });
 
-      if (data._emailVerified) throw new Error("user-already-verified" as ErrorType);
+      if (data.emailVerified) throw new Error("user-already-verified" as ErrorType);
 
       return user;
     } catch (err) {
@@ -90,7 +92,7 @@ export class UserService implements IUserServiceInteractor {
   }
 
   async createUser(username: string, email: string, password: string): Promise<string> {
-    this.userEntity.validateCreateUser(username, email, password);
+    this.entity.validate(username, email, password);
 
     const uid = await this.repository.create(username, email, password);
 
@@ -108,15 +110,15 @@ export class UserService implements IUserServiceInteractor {
       const setId = generateSetId();
 
       const refreshToken = this.auth.createToken({
-        uid: data._uid,
+        uid: data.uid,
         setId: setId,
         tokenType: "REFRESH",
       });
 
-      await this.repository.setSession(data._uid, setId, refreshToken);
+      await this.repository.setSession(data.uid, setId, refreshToken);
 
       const accessToken = this.auth.createToken({
-        uid: data._uid,
+        uid: data.uid,
         setId: setId,
         tokenType: "ACCESS",
       });
@@ -149,13 +151,11 @@ export class UserService implements IUserServiceInteractor {
 
   async resetPasswordRequest(email: string): Promise<string> {
     try {
-      this.userEntity.setEmail(email);
-
-      this.userEntity.validateEmail();
+      this.entity.validateEmail(email);
 
       const data = await this.repository.getUserData({ email, useCases: ["DEFAULT"] });
 
-      const token = this.auth.createToken({ uid: data._uid, email: email, tokenType: "PASSRESET" });
+      const token = this.auth.createToken({ uid: data.uid, email: email, tokenType: "PASSRESET" });
 
       return token;
     } catch (err) {
@@ -169,9 +169,7 @@ export class UserService implements IUserServiceInteractor {
 
   async resetPassword(newPassword: string, token: string): Promise<void> {
     try {
-      this.userEntity.setPassword(newPassword);
-
-      this.userEntity.validatePassword();
+      this.entity.validatePassword(newPassword);
 
       const payload = this.auth.getPayload({
         token: token,
@@ -196,9 +194,7 @@ export class UserService implements IUserServiceInteractor {
 
   async changePassword(uid: string, newPassword: string): Promise<void> {
     try {
-      this.userEntity.setPassword(newPassword);
-
-      this.userEntity.validatePassword();
+      this.entity.validatePassword(uid);
 
       await this.repository.changePassword(uid, newPassword);
     } catch (err) {
@@ -214,7 +210,7 @@ export class UserService implements IUserServiceInteractor {
     try {
       const data = await this.repository.getUserData({ uid, useCases: ["DEFAULT"] });
 
-      return data._password;
+      return data.password;
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

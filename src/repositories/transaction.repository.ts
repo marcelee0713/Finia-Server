@@ -1,9 +1,5 @@
 import { injectable } from "inversify";
-import {
-  INonFuncTransaction,
-  ITransactionRepository,
-  TransactionObject,
-} from "../interfaces/transaction.interface";
+import { ITransactionRepository, TransactionObject } from "../interfaces/transaction.interface";
 import { TransactionTypes } from "../types/transaction.types";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
@@ -119,8 +115,8 @@ export class TransactionRepository implements ITransactionRepository {
           uid: val.uid,
           userId: val.user_id,
           categoryId: val.category_id,
-          amount: val.amount.toNumber(),
-          created_at: val.created_at,
+          amount: val.amount.toString(),
+          createdAt: val.created_at,
           type: val.type,
           note: val.note ?? undefined,
         });

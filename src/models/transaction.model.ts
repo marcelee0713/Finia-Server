@@ -8,10 +8,10 @@ export class Transaction implements ITransaction {
   _uid!: string;
   _userId!: string;
   _categoryId!: string;
-  _amount!: number;
+  _amount!: string;
   _type!: TransactionTypes;
   _note?: string;
-  _created_at!: Date;
+  _createdAt!: Date;
 
   getUid = (): string => this._uid;
 
@@ -31,9 +31,9 @@ export class Transaction implements ITransaction {
     this._categoryId = categoryId;
   };
 
-  getAmount = (): number => this._amount;
+  getAmount = (): string => this._amount;
 
-  setAmount = (amount: number) => {
+  setAmount = (amount: string) => {
     this._amount = amount;
   };
 
@@ -49,17 +49,17 @@ export class Transaction implements ITransaction {
     this._note = note;
   };
 
-  getCreatedAt = (): Date => this._created_at;
+  getCreatedAt = (): Date => this._createdAt;
 
-  setCreatedAt = (created_at: Date) => {
-    this._created_at = created_at;
+  setCreatedAt = (date: Date) => {
+    this._createdAt = date;
   };
 
   set = (
     uid: string,
     userId: string,
     categoryId: string,
-    amount: number,
+    amount: string,
     type: TransactionTypes,
     createdAt: Date,
     note?: string | undefined
@@ -69,7 +69,7 @@ export class Transaction implements ITransaction {
     this._categoryId = categoryId;
     this._amount = amount;
     this._type = type;
-    this._created_at = createdAt;
+    this._createdAt = createdAt;
     this._note = note;
   };
 

@@ -1,32 +1,16 @@
+import { injectable } from "inversify";
 import { IUser } from "../interfaces/user.interface";
 import { ErrorType } from "../types/error.types";
 
+@injectable()
 export class User implements IUser {
-  _uid: string;
-  _username: string;
-  _email: string;
-  _emailVerified: Date | null;
-  _password: string;
-  _role: string;
-  _created_at: Date | null;
-
-  constructor(
-    _uid: string,
-    _username: string,
-    _email: string,
-    _emailVerified: Date | null,
-    _password: string,
-    _role: string,
-    _created_at: Date | null
-  ) {
-    this._uid = _uid;
-    this._username = _username;
-    this._email = _email;
-    this._emailVerified = _emailVerified;
-    this._password = _password;
-    this._role = _role;
-    this._created_at = _created_at;
-  }
+  _uid!: string;
+  _username!: string;
+  _email!: string;
+  _emailVerified!: Date | null;
+  _password!: string;
+  _role!: string;
+  _createdAt!: Date;
 
   getUid = (): string => this._uid;
 
@@ -46,7 +30,7 @@ export class User implements IUser {
     this._email = _email;
   };
 
-  isEmailVerified = (): boolean => (this._emailVerified ? true : false);
+  getEmailVerifiedDate = (): Date | null => this._emailVerified;
 
   setEmailVerified = (date: Date) => {
     this._emailVerified = date;
@@ -64,54 +48,52 @@ export class User implements IUser {
     this._role = _role;
   };
 
-  getcreated_at = (): Date | null => this._created_at;
+  getCreatedAt = (): Date => this._createdAt;
 
-  setcreated_at = (date: Date) => {
-    this._created_at = date;
+  setCreatedAt = (date: Date) => {
+    this._createdAt = date;
   };
 
-  validateUsername() {
+  isEmailVerifiedDate = (): boolean => this._emailVerified !== null;
+
+  validateUsername(username: string) {
     const minLength = 3;
     const maxLength = 50;
     const _usernameRegex = /^[a-zA-Z]{2}[a-zA-Z0-9]*$/;
 
-    if (this._username.length < minLength || this._username.length > maxLength) {
+    if (username.length < minLength || username.length > maxLength) {
       throw new Error("invalid-username" as ErrorType);
     }
 
-    if (!_usernameRegex.test(this._username)) {
+    if (!_usernameRegex.test(username)) {
       throw new Error("invalid-username" as ErrorType);
     }
   }
 
-  validatePassword() {
+  validatePassword(password: string) {
     const minLength = 8;
-    const _passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
 
-    if (this._password.length < minLength) {
+    if (password.length < minLength) {
       throw new Error("invalid-password" as ErrorType);
     }
 
-    if (!_passwordRegex.test(this._password)) {
+    if (!passwordRegex.test(password)) {
       throw new Error("invalid-password" as ErrorType);
     }
   }
 
-  validateEmail() {
-    const _emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  validateEmail(email: string) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-    if (!_emailRegex.test(this._email)) {
+    if (!emailRegex.test(email)) {
       throw new Error("invalid-email" as ErrorType);
     }
   }
 
-  validateCreateUser(_username?: string, _email?: string, _password?: string) {
-    this._username = _username ?? "";
-    this._email = _email ?? "";
-    this._password = _password ?? "";
-
-    this.validateUsername();
-    this.validateEmail();
-    this.validatePassword();
+  validate(username: string, email: string, password: string) {
+    this.validateUsername(username);
+    this.validateEmail(email);
+    this.validatePassword(password);
   }
 }

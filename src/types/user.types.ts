@@ -7,3 +7,5 @@ export interface UserParams {
 }
 
 type UseCase = "DEFAULT" | "VERIFY_EMAIL" | "LOGIN";
+
+export type UserType = "USER" | "ADMIN";

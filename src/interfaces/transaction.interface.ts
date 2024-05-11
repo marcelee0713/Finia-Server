@@ -1,18 +1,19 @@
 import { TransactionTypes } from "../types/transaction.types";
+import { ExcludeFunctions, ExcludeUnderscores } from "../utils/type-modifications";
 
 export interface ITransaction {
   _uid: string;
   _userId: string;
   _categoryId: string;
-  _amount: number;
+  _amount: string;
   _type: TransactionTypes;
   _note?: string;
-  _created_at: Date;
+  _createdAt: Date;
   set: (
     uid: string,
     userId: string,
     categoryId: string,
-    amount: number,
+    amount: string,
     type: TransactionTypes,
     createdAt: Date,
     note?: string
@@ -23,8 +24,8 @@ export interface ITransaction {
   setUserId: (userId: string) => void;
   getCategoryId: () => void;
   setCategoryId: (categoryId: string) => void;
-  getAmount: () => number;
-  setAmount: (amount: number) => void;
+  getAmount: () => string;
+  setAmount: (amount: string) => void;
   getType: () => TransactionTypes;
   setType: (type: TransactionTypes) => void;
   getCreatedAt: () => Date;
@@ -37,17 +38,7 @@ export interface ITransaction {
   validate: (amount: string, type: string, note: string | undefined) => void;
 }
 
-type FunctionKey<T> = {
-  [K in keyof T]: T[K] extends CallableFunction ? K : never;
-}[keyof T];
-
-type ExcludeFunctions<T> = Omit<T, FunctionKey<T>>;
-
-export interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {}
-
-type ExcludeUnderscores<T> = {
-  [K in keyof T as `${Uncapitalize<string & K> extends `_${infer R}` ? Uncapitalize<string & R> : Uncapitalize<string & K>}`]: T[K];
-};
+interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {}
 
 export type TransactionObject = ExcludeUnderscores<INonFuncTransaction>;
 

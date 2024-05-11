@@ -1,4 +1,4 @@
-import { IUser, IUserRepository } from "../interfaces/user.interface";
+import { IUserRepository, UserObject } from "../interfaces/user.interface";
 import * as bcrypt from "bcrypt";
 import { injectable } from "inversify";
 import { RedisClientType, redisClient } from "../db/redis";
@@ -15,7 +15,7 @@ export class UserRepository implements IUserRepository {
     this.prismaClient = db;
   }
 
-  async getUserData(data: UserParams): Promise<IUser> {
+  async getUserData(data: UserParams): Promise<UserObject> {
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {
@@ -38,13 +38,13 @@ export class UserRepository implements IUserRepository {
       }
 
       return {
-        _uid: user.uid,
-        _username: user.username,
-        _email: user.email,
-        _password: user.password,
-        _role: user.role,
-        _emailVerified: user.emailVerified,
-        _created_at: user.created_at,
+        uid: user.uid,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        createdAt: user.created_at,
       };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {

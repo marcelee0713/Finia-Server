@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand --no-cache --forceExit",
-    "build": "npm install && npx tsc && tsc --build",
+    "build": "npm install && npx tsc && tsc --build && npx prisma generate",
     "start": "node ./dist/index.js",
-    "dev:build": "rimraf dist && npx tsc",
+    "dev:build": "rimraf dist && npx tsc && npx prisma generate",
     "dev": "nodemon ./src/index.ts",
     "dev:reset": "rimraf node_modules dist package-lock.json",
     "lint:check": "eslint ."

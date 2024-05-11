@@ -1,6 +1,6 @@
 import express from "express";
 import { Container } from "inversify";
-import { IUserRepository, IUserServiceInteractor } from "../interfaces/user.interface";
+import { IUser, IUserRepository, IUserServiceInteractor } from "../interfaces/user.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { UserRepository } from "../repositories/user.repository";
 import { UserService } from "../services/user.services";
@@ -27,6 +27,7 @@ import {
   loginAndOutRateLimit,
   passwordModificationRateLimit,
 } from "../middlewares/rate-limiter/user.rate.limit";
+import { User } from "../models/user.model";
 
 export const container = new Container();
 container.bind<IUserRepository>(INTERFACE_TYPE.UserRepository).to(UserRepository);
@@ -35,6 +36,7 @@ container.bind(INTERFACE_TYPE.UserController).to(UserController);
 container.bind(INTERFACE_TYPE.UserMiddlewares).to(UserMiddlewares);
 container.bind<IJWTService>(INTERFACE_TYPE.JWTServices).to(JWTServices);
 container.bind<IEmailService>(INTERFACE_TYPE.EmailServices).to(EmailServices);
+container.bind<IUser>(INTERFACE_TYPE.UserEntity).to(User);
 
 const userRouter = express.Router();
 
