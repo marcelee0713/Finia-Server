@@ -42,10 +42,11 @@ export class TransactionController {
       const userId = req.body.userId;
       const type = req.body.type;
       const category = req.body.category;
+      const useCase = req.body.useCase;
 
-      const transactions = await this.interactor.getTransactions(userId, type, category);
+      const transactions = await this.interactor.getTransactions(userId, type, category, useCase);
 
-      return res.status(200).json(transactions);
+      return res.status(transactions ? 200 : 204).json(transactions ?? {});
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);

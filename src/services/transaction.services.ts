@@ -3,9 +3,12 @@ import {
   ITransaction,
   ITransactionRepository,
   ITransactionServiceInteractor,
-  TransactionObject,
 } from "../interfaces/transaction.interface";
-import { TransactionTypes } from "../types/transaction.types";
+import {
+  TransactionReturnType,
+  TransactionTypes,
+  TransactionUseCases,
+} from "../types/transaction.types";
 import { INTERFACE_TYPE } from "../utils";
 
 @injectable()
@@ -41,14 +44,17 @@ export class TransactionService implements ITransactionServiceInteractor {
   async getTransactions(
     userId: string,
     type?: string,
-    category?: string | undefined
-  ): Promise<TransactionObject[]> {
+    category?: string,
+    useCase?: string
+  ): Promise<TransactionReturnType<TransactionUseCases>> {
     try {
       if (type) this.entity.validateType(type);
 
       const transactions = await this.repository.get(userId, type as TransactionTypes, category);
 
-      return transactions;
+      const object = this.entity.dto(transactions, useCase);
+
+      return object;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");

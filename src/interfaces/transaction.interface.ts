@@ -1,5 +1,25 @@
-import { TransactionTypes } from "../types/transaction.types";
+import { transactionType } from "@prisma/client";
+import {
+  Months,
+  TransactionReturnType,
+  TransactionTypes,
+  TransactionUseCases,
+} from "../types/transaction.types";
 import { ExcludeFunctions, ExcludeUnderscores } from "../utils/type-modifications";
+
+interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {
+  categoryName: string;
+}
+
+export interface MonthTransaction {
+  month: Months;
+  amount: string;
+}
+
+export interface TotalAmountInCategory {
+  categoryName: string;
+  amount: string;
+}
 
 export interface ITransaction {
   _uid: string;
@@ -9,6 +29,7 @@ export interface ITransaction {
   _type: TransactionTypes;
   _note?: string;
   _createdAt: Date;
+
   set: (
     uid: string,
     userId: string,
@@ -18,29 +39,134 @@ export interface ITransaction {
     createdAt: Date,
     note?: string
   ) => void;
+
   getUid: () => string;
+
   setUid: (uid: string) => void;
+
   getUserId: () => string;
+
   setUserId: (userId: string) => void;
+
   getCategoryId: () => void;
+
   setCategoryId: (categoryId: string) => void;
+
   getAmount: () => string;
+
   setAmount: (amount: string) => void;
+
   getType: () => TransactionTypes;
+
   setType: (type: TransactionTypes) => void;
+
   getCreatedAt: () => Date;
+
   setCreatedAt: (createdAt: Date) => void;
+
   getNote: () => string | undefined;
+
   setNote: (note: string) => void;
+
   validateAmount: (enteredAmount: string) => void;
+
   validateType: (enteredType: string) => void;
+
   validateNote: (enteredNote: string | undefined) => void;
+
   validate: (amount: string, type: string, note: string | undefined) => void;
+
+  mostSpentCategory: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  mostEarnedCategory: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  largestExpense: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  largestRevenue: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  totalExpenses: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  totalTransactionThisDay: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  totalTransactionThisMonth: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  currentMonthExpenses: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  netIncome: (data: TransactionData[], useCase: TransactionUseCases) => TransactionInfo | undefined;
+
+  highestTransactionInADay: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  monthlyTransactions: (
+    data: TransactionData[],
+    type: transactionType,
+    useCase: TransactionUseCases
+  ) => MonthlyTransactions | undefined;
+
+  categoryTransactions: (
+    data: TransactionData[],
+    type: transactionType,
+    useCase: TransactionUseCases
+  ) => CategoryTransactions | undefined;
+
+  dto: (
+    data: TransactionData[],
+    useCases: TransactionUseCases | string | undefined
+  ) => TransactionReturnType<TransactionUseCases>;
 }
 
-interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {}
+export interface CategoryTransactions {
+  type: TransactionTypes;
+  data: TotalAmountInCategory[];
+  useCase: TransactionUseCases;
+}
 
-export type TransactionObject = ExcludeUnderscores<INonFuncTransaction>;
+export interface MonthlyTransactions {
+  type: TransactionTypes;
+  monthlyTransactions: MonthTransaction[];
+  useCase: TransactionUseCases;
+}
+
+export interface TransactionInfo {
+  userId: string;
+  useCase: TransactionUseCases;
+  info: string;
+  subInfo?: string;
+  category?: string;
+  amount?: string;
+  note?: string;
+  date?: string;
+  month?: string;
+  day?: string;
+}
+
+export type TransactionData = ExcludeUnderscores<INonFuncTransaction>;
 
 export interface ITransactionServiceInteractor {
   createTransaction(
@@ -51,7 +177,12 @@ export interface ITransactionServiceInteractor {
     note?: string
   ): Promise<void>;
 
-  getTransactions(userId: string, type?: string, category?: string): Promise<TransactionObject[]>;
+  getTransactions(
+    userId: string,
+    type?: string,
+    category?: string,
+    useCase?: string
+  ): Promise<TransactionReturnType<TransactionUseCases>>;
 
   updateTransaction(
     uid: string,
@@ -74,7 +205,7 @@ export interface ITransactionRepository {
     note?: string
   ): Promise<void>;
 
-  get(userId: string, type?: TransactionTypes, category?: string): Promise<TransactionObject[]>;
+  get(userId: string, type?: TransactionTypes, category?: string): Promise<TransactionData[]>;
 
   update(
     uid: string,

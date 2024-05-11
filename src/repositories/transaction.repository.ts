@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { ITransactionRepository, TransactionObject } from "../interfaces/transaction.interface";
+import { ITransactionRepository, TransactionData } from "../interfaces/transaction.interface";
 import { TransactionTypes } from "../types/transaction.types";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
@@ -56,8 +56,8 @@ export class TransactionRepository implements ITransactionRepository {
     userId: string,
     type?: TransactionTypes,
     category?: string
-  ): Promise<TransactionObject[]> {
-    let list: TransactionObject[] = [];
+  ): Promise<TransactionData[]> {
+    let list: TransactionData[] = [];
     let transactions = [];
     try {
       const _category =
@@ -83,12 +83,26 @@ export class TransactionRepository implements ITransactionRepository {
               category: category,
             },
           },
+          include: {
+            categories: {
+              select: {
+                category: true,
+              },
+            },
+          },
         });
       } else if (type && !category) {
         transactions = await this.prismaClient.transactions.findMany({
           where: {
             user_id: userId,
             type: type,
+          },
+          include: {
+            categories: {
+              select: {
+                category: true,
+              },
+            },
           },
         });
       } else if (!type && _category) {
@@ -101,11 +115,25 @@ export class TransactionRepository implements ITransactionRepository {
               category: category,
             },
           },
+          include: {
+            categories: {
+              select: {
+                category: true,
+              },
+            },
+          },
         });
       } else {
         transactions = await this.prismaClient.transactions.findMany({
           where: {
             user_id: userId,
+          },
+          include: {
+            categories: {
+              select: {
+                category: true,
+              },
+            },
           },
         });
       }
@@ -115,6 +143,7 @@ export class TransactionRepository implements ITransactionRepository {
           uid: val.uid,
           userId: val.user_id,
           categoryId: val.category_id,
+          categoryName: val.categories.category,
           amount: val.amount.toString(),
           createdAt: val.created_at,
           type: val.type,
