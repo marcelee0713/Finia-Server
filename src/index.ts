@@ -15,7 +15,9 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log("Currently listening to port: " + PORT);
+});
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/transactions", transactionRouter);

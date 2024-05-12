@@ -3,10 +3,11 @@ services:
   api:
     build:
       context: .
-    container_name: finia-server
-    environment:
-      NODE_ENV: production
+    container_name: finia-backend
     env_file:
       - .env
     ports:
       - 3001:3001
+    volumes:
+      - .:/app
+      - /app/node_modules

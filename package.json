@@ -8,7 +8,7 @@
     "build": "npx tsc && npx prisma generate",
     "start": "node ./dist/index.js",
     "dev:build": "rimraf dist && npx tsc && npx prisma generate",
-    "dev": "nodemon ./src/index.ts",
+    "dev": "nodemon -L ./src/index.ts",
     "dev:reset": "rimraf node_modules dist package-lock.json",
     "lint:check": "eslint ."
   },
