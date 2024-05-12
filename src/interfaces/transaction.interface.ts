@@ -1,4 +1,3 @@
-import { transactionType } from "@prisma/client";
 import {
   Months,
   TransactionReturnType,
@@ -125,13 +124,13 @@ export interface ITransaction {
 
   monthlyTransactions: (
     data: TransactionData[],
-    type: transactionType,
+    type: TransactionTypes,
     useCase: TransactionUseCases
   ) => MonthlyTransactions | undefined;
 
   categoryTransactions: (
     data: TransactionData[],
-    type: transactionType,
+    type: TransactionTypes,
     useCase: TransactionUseCases
   ) => CategoryTransactions | undefined;
 

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand --no-cache --forceExit",
-    "build": "npm install && npx tsc && tsc --build && npx prisma generate",
+    "build": "npx tsc && npx prisma generate",
     "start": "node ./dist/index.js",
     "dev:build": "rimraf dist && npx tsc && npx prisma generate",
     "dev": "nodemon ./src/index.ts",

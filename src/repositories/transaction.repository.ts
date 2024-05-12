@@ -60,7 +60,7 @@ export class TransactionRepository implements ITransactionRepository {
     skip?: number,
     take?: number
   ): Promise<TransactionData[]> {
-    let list: TransactionData[] = [];
+    const list: TransactionData[] = [];
     let transactions = [];
     try {
       const _category =
