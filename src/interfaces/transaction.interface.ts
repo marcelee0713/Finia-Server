@@ -75,6 +75,11 @@ export interface ITransaction {
 
   validate: (amount: string, type: string, note: string | undefined) => void;
 
+  totalTransactions: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
   mostSpentCategory: (
     data: TransactionData[],
     useCase: TransactionUseCases
@@ -96,6 +101,11 @@ export interface ITransaction {
   ) => TransactionInfo | undefined;
 
   totalExpenses: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
+  totalRevenues: (
     data: TransactionData[],
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;

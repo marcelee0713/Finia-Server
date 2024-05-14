@@ -118,6 +118,33 @@ export class Transaction implements ITransaction {
     this.validateNote(note);
   }
 
+  totalTransactions = (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ): TransactionInfo | undefined => {
+    if (data.length === 0) return undefined;
+
+    let revenueCount = 0;
+    let expensesCount = 0;
+
+    data.forEach((val) => {
+      if (val.type === "EXPENSES") {
+        expensesCount++;
+      } else {
+        revenueCount++;
+      }
+    });
+
+    const transaction: TransactionInfo = {
+      useCase: useCase,
+      userId: data[0].userId,
+      info: `${data.length} transactions`,
+      subInfo: `${revenueCount} revenues : ${expensesCount} expenses`,
+    };
+
+    return transaction;
+  };
+
   mostSpentCategory = (
     data: TransactionData[],
     useCase: TransactionUseCases
@@ -289,6 +316,37 @@ export class Transaction implements ITransaction {
     transaction.amount = totalExpenses.toString();
 
     return totalExpenses > 0 ? transaction : undefined;
+  };
+
+  totalRevenues = (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ): TransactionInfo | undefined => {
+    if (data.length === 0) return undefined;
+
+    const transaction: TransactionInfo | undefined = {
+      userId: "",
+      useCase: useCase,
+      info: "",
+    };
+
+    let totalRevenue = 0;
+
+    let userId = "";
+
+    data.forEach((val) => {
+      userId = val.userId;
+
+      if (val.type === "REVENUE") {
+        totalRevenue = parseInt(val.amount) + totalRevenue;
+      }
+    });
+
+    transaction.userId = userId;
+    transaction.info = "Total revenues all time";
+    transaction.amount = totalRevenue.toString();
+
+    return totalRevenue > 0 ? transaction : undefined;
   };
 
   totalTransactionThisDay = (
@@ -632,6 +690,9 @@ export class Transaction implements ITransaction {
     if (!useCases || !isTransactionUseCase(useCases)) return data;
 
     switch (useCases) {
+      case "TOTAL_TRANSACTIONS_INFO":
+        return this.totalTransactions(data, useCases) as TransactionReturnType<typeof useCases>;
+
       case "MOST_SPENT_CATEGORY_INFO":
         return this.mostSpentCategory(data, useCases) as TransactionReturnType<typeof useCases>;
 
@@ -646,6 +707,9 @@ export class Transaction implements ITransaction {
 
       case "TOTAL_EXPENSES_INFO":
         return this.totalExpenses(data, useCases) as TransactionReturnType<typeof useCases>;
+
+      case "TOTAL_REVENUES_INFO":
+        return this.totalRevenues(data, useCases) as TransactionReturnType<typeof useCases>;
 
       case "TOTAL_TRANSACTION_THIS_DAY_INFO":
         return this.totalTransactionThisDay(data, useCases) as TransactionReturnType<
