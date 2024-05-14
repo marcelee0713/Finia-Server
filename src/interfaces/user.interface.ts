@@ -34,6 +34,8 @@ interface INonFuncUser extends ExcludeFunctions<IUser> {}
 
 export type UserObject = ExcludeUnderscores<INonFuncUser>;
 
+export type PasswordLessUserObject = Omit<UserObject, "password">;
+
 export interface IUserServiceInteractor {
   createUser(username: string, email: string, password: string): Promise<string>;
   logInUser(username: string, password: string): Promise<string>;
@@ -44,9 +46,10 @@ export interface IUserServiceInteractor {
   ): Promise<{ uid: string; email: string }>;
   verifyEmailAddress(token: string): Promise<void>;
   resetPasswordRequest(email: string): Promise<string>;
-  resetPassword(newPassword: string, token: string): Promise<void>;
-  changePassword(uid: string, newPassword: string): Promise<void>;
+  resetPassword(newPassword: string, token: string, shouldLogOut: boolean): Promise<void>;
+  changePassword(uid: string, newPassword: string, shouldLogOut: boolean): Promise<void>;
   getPassword(uid: string): Promise<string>;
+  getUserData(uid: string): Promise<PasswordLessUserObject>;
 }
 
 export interface IUserRepository {
@@ -58,5 +61,5 @@ export interface IUserRepository {
   verifyEmail(uid: string, email: string): Promise<void>;
   checkTokenInBlacklist(uid: string, token: string): Promise<boolean>;
   addTokenToBlacklist(uid: string, token: string): Promise<void>;
-  changePassword(uid: string, newPassword: string): Promise<void>;
+  changePassword(uid: string, newPassword: string, shouldLogOut: boolean): Promise<void>;
 }

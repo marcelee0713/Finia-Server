@@ -1,5 +1,10 @@
 import { inject, injectable } from "inversify";
-import { IUser, IUserRepository, IUserServiceInteractor } from "../interfaces/user.interface";
+import {
+  IUser,
+  IUserRepository,
+  IUserServiceInteractor,
+  PasswordLessUserObject,
+} from "../interfaces/user.interface";
 import { IJWTService } from "../interfaces/jwt.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { generateSetId } from "../utils/set-id-generator";
@@ -99,6 +104,30 @@ export class UserService implements IUserServiceInteractor {
     return uid;
   }
 
+  async getUserData(uid: string): Promise<PasswordLessUserObject> {
+    try {
+      const data = await this.repository.getUserData({
+        uid: uid,
+        useCases: ["DEFAULT"],
+      });
+
+      return {
+        uid: data.uid,
+        username: data.username,
+        email: data.email,
+        emailVerified: data.emailVerified,
+        createdAt: data.createdAt,
+        role: data.role,
+      };
+    } catch (err) {
+      if (err instanceof Error) {
+        throw Error(err.message);
+      }
+
+      throw Error("Internal server error");
+    }
+  }
+
   async logInUser(username: string, password: string): Promise<string> {
     try {
       const data = await this.repository.getUserData({
@@ -180,7 +209,7 @@ export class UserService implements IUserServiceInteractor {
 
       if (isTokenBlacklisted) throw new Error("blacklisted-token" as ErrorType);
 
-      await this.repository.changePassword(payload.uid, newPassword);
+      await this.repository.changePassword(payload.uid, newPassword, false);
 
       await this.repository.addTokenToBlacklist(payload.uid, token);
     } catch (err) {
@@ -192,11 +221,11 @@ export class UserService implements IUserServiceInteractor {
     }
   }
 
-  async changePassword(uid: string, newPassword: string): Promise<void> {
+  async changePassword(uid: string, newPassword: string, shouldLogOut: boolean): Promise<void> {
     try {
       this.entity.validatePassword(uid);
 
-      await this.repository.changePassword(uid, newPassword);
+      await this.repository.changePassword(uid, newPassword, shouldLogOut);
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

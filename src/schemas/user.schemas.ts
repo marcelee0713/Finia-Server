@@ -38,6 +38,7 @@ export const passwordResetSchema = z.object({
   body: z.object({
     token: z.string().trim(),
     password: z.string().min(8),
+    removeSessions: z.string().trim(),
   }),
 });
 
@@ -45,5 +46,6 @@ export const changePasswordSchema = z.object({
   body: z.object({
     uid: z.string().trim(),
     newPassword: z.string().min(8),
+    removeSessions: z.string().trim(),
   }),
 });

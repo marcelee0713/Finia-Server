@@ -154,8 +154,9 @@ export class UserController {
     try {
       const newPassword = req.body.password;
       const token = req.body.token;
+      const removeSessions = req.body.removeSessions === "YES" ? true : false;
 
-      await this.interactor.resetPassword(newPassword, token);
+      await this.interactor.resetPassword(newPassword, token, removeSessions);
 
       return res.status(200).json({ res: "Successfully reset your password!" });
     } catch (err) {
@@ -173,10 +174,31 @@ export class UserController {
     try {
       const uid = req.body.uid;
       const newPassword = req.body.newPassword;
+      const removeSessions = req.body.removeSessions === "YES" ? true : false;
 
-      await this.interactor.changePassword(uid, newPassword);
+      await this.interactor.changePassword(uid, newPassword, removeSessions);
 
       return res.status(200).json({ res: "Successfully reset your password!" });
+    } catch (err) {
+      if (err instanceof Error) {
+        const errObj = handleError(err.message as ErrorType);
+
+        return res.status(parseInt(errObj.status)).json(errObj);
+      }
+
+      return res.status(500).json({ error: "Internal server error." });
+    }
+  }
+
+  async onGetUserData(req: Request, res: Response) {
+    try {
+      const uid = res.locals.uid;
+
+      if (!res.locals.uid) throw new Error("not-authorized");
+
+      const data = await this.interactor.getUserData(uid);
+
+      return res.status(200).json(data);
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);

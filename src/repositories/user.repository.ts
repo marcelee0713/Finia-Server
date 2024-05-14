@@ -273,7 +273,9 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async changePassword(uid: string, newPassword: string): Promise<void> {
+  async changePassword(uid: string, newPassword: string, shouldLogOut: boolean): Promise<void> {
+    const redis: RedisClientType = await redisClient();
+
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {
@@ -297,9 +299,16 @@ export class UserRepository implements IUserRepository {
           password: await bcrypt.hash(newPassword, 10),
         },
       });
+
+      if (shouldLogOut) {
+        const key = `${user.uid}:sessions`;
+        await redis.DEL(key);
+      }
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
+    } finally {
+      await redis.disconnect();
     }
   }
 }

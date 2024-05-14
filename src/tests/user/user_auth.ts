@@ -106,7 +106,7 @@ export const UserAuthTestSuite = () => {
 
     const response = await request(app)
       .patch("/api/v1/users/reset-password")
-      .send({ password: body.password, token: token });
+      .send({ password: body.password, token: token, removeSessions: "NO" });
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty(
@@ -129,7 +129,7 @@ export const UserAuthTestSuite = () => {
 
     const response = await request(app)
       .patch("/api/v1/users/reset-password")
-      .send({ password: body.password, token: token });
+      .send({ password: body.password, token: token, removeSessions: "NO" });
 
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("message", "Password reset request is no longer valid!");
@@ -151,7 +151,7 @@ export const UserAuthTestSuite = () => {
 
     const response = await request(app)
       .patch("/api/v1/users/reset-password")
-      .send({ password: body.password, token: token });
+      .send({ password: body.password, token: token, removeSessions: "NO" });
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("res", "Successfully reset your password!");
@@ -164,7 +164,7 @@ export const UserAuthTestSuite = () => {
 
     const response = await request(app)
       .patch("/api/v1/users/reset-password")
-      .send({ password: body.password, token: usedToken });
+      .send({ password: body.password, token: usedToken, removeSessions: "NO" });
 
     expect(response.status).toBe(403);
     expect(response.body).toHaveProperty("message", "The current request had already been used.");

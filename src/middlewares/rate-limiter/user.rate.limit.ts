@@ -39,3 +39,11 @@ export const passwordModificationRateLimit = rateLimit({
   legacyHeaders: false,
   skipFailedRequests: true,
 });
+
+export const getUserDataRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipFailedRequests: true,
+});

@@ -24,6 +24,7 @@ import {
   createAccountRateLimit,
   emailAndPassVerifyingRateLimit,
   emailAndPasswordVerificationRequestRateLimit,
+  getUserDataRateLimit,
   loginAndOutRateLimit,
   passwordModificationRateLimit,
 } from "../middlewares/rate-limiter/user.rate.limit";
@@ -42,6 +43,13 @@ const userRouter = express.Router();
 
 const controller = container.get<UserController>(INTERFACE_TYPE.UserController);
 export const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
+
+userRouter.get(
+  "/",
+  getUserDataRateLimit,
+  (req, res, next) => middleware.handleReq(req, res, next),
+  controller.onGetUserData.bind(controller)
+);
 
 userRouter.post(
   "/create",
