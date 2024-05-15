@@ -143,7 +143,7 @@ const main = async () => {
       ],
     });
   } catch (err) {
-    console.log("Seeding Error: " + err);
+    throw new Error("Unexpected error when seeding, the errors: " + err);
   } finally {
     await db.$disconnect();
     process.exit();

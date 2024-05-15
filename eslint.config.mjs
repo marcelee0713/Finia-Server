@@ -1,37 +1,31 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
-import eslintConfigPrettier from "eslint-config-prettier";
+import tsParser from "@typescript-eslint/parser";
 
 export default [
-  eslintConfigPrettier,
-  pluginJs.configs.recommended,
+  eslint.configs.recommended,
   ...tseslint.configs.recommended,
-
   {
     languageOptions: {
-      globals: globals.node,
-      ecmaVersion: 2022,
-      sourceType: "module",
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: "module",
+      },
+      globals: {
+        jest: true,
+        module: "readonly",
+      },
     },
-    files: ["test/**/*"],
+    files: ["src/**/*.ts", "**/*.js"],
     ignores: ["node_modules/", "dist/"],
     rules: {
-      "no-unused-vars": "off",
       "no-console": "warn",
-      "no-empty": "warn",
-      "@typescript-eslint/ban-types": "error",
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/prefer-as-const": "error",
+      "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "warn",
-      "jest/no-disabled-tests": "warn",
-      "jest/no-focused-tests": "error",
-      "jest/no-identical-title": "error",
-      "jest/prefer-to-have-length": "warn",
-      "jest/valid-expect": "error",
-    },
-    env: {
-      "jest/globals": true,
+      "@typescript-eslint/ban-types": "error",
+      "no-array-constructor": "off",
+      "@typescript-eslint/prefer-as-const": "warn",
     },
   },
 ];
