@@ -84,6 +84,10 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
 
+        if ((errObj.message as ErrorType) === "not-authorized") {
+          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+        }
+
         return res.status(parseInt(errObj.status)).json(errObj);
       }
 
@@ -193,15 +197,27 @@ export class UserController {
   async onGetUserData(req: Request, res: Response) {
     try {
       const uid = res.locals.uid;
+      const token = res.locals.token;
 
       if (!res.locals.uid) throw new Error("not-authorized");
 
       const data = await this.interactor.getUserData(uid);
 
-      return res.status(200).json(data);
+      return res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 2592000000,
+        })
+        .status(200)
+        .json(data);
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
+
+        if ((errObj.message as ErrorType) === "not-authorized") {
+          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+        }
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -222,6 +238,10 @@ export class UserController {
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
+
+        if ((errObj.message as ErrorType) === "not-authorized") {
+          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+        }
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
