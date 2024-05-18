@@ -84,10 +84,6 @@ export class UserController {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
 
-        if ((errObj.message as ErrorType) === "not-authorized") {
-          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
-        }
-
         return res.status(parseInt(errObj.status)).json(errObj);
       }
 
