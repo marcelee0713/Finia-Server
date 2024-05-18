@@ -44,14 +44,14 @@ export class EmailServices implements IEmailService {
         tokenType: "EMAIL",
       });
 
-      this.url = `${this.url}${authRoute}?token=${token}`;
+      const emailVerificationLink = `${this.url}${authRoute}?token=${token}`;
 
       await this.transporter.sendMail({
         to: emailToSend,
         from: { name: DEFAULT_EMAIL_CONTENT.Name, address: this.emailAddress },
         subject: DEFAULT_EMAIL_CONTENT.Subject,
         text: DEFAULT_EMAIL_CONTENT.Text,
-        html: `<h1>Email Verification</h1><br><a href=${this.url}>Confirm Email and Sign in</a><br><p>This will expire in one day. <strong>DO NOT SHARE THIS LINK!</strong></p>`,
+        html: `<h1>Email Verification</h1><br><a href=${emailVerificationLink}>Confirm Email and Sign in</a><br><p>This will expire in one day. <strong>DO NOT SHARE THIS LINK!</strong></p>`,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -70,14 +70,14 @@ export class EmailServices implements IEmailService {
         tokenType: "PASSRESET",
       }) as EmailAndResetPayloadType;
 
-      this.url = `${this.url}${resetPassRoute}?token=${token}`;
+      const resetPasswordLink = `${this.url}${resetPassRoute}?token=${token}`;
 
       await this.transporter.sendMail({
         to: payload.email,
         from: { name: DEFAULT_RESET_PASS_CONTENT.Name, address: this.emailAddress },
         subject: DEFAULT_RESET_PASS_CONTENT.Subject,
         text: DEFAULT_RESET_PASS_CONTENT.Text,
-        html: `<h1>Reset Password</h1><br><a href=${this.url}>Create a new password</a><br><p>This will expire in one day. <strong>DO NOT SHARE THIS LINK!</strong></p>`,
+        html: `<h1>Reset Password</h1><br><a href=${resetPasswordLink}>Create a new password</a><br><p>This will expire in one day. <strong>DO NOT SHARE THIS LINK!</strong></p>`,
       });
     } catch (err) {
       if (err instanceof Error) {
