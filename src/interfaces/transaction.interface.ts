@@ -125,6 +125,11 @@ export interface ITransaction {
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
+  currentMonthRevenues: (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ) => TransactionInfo | undefined;
+
   netIncome: (data: TransactionData[], useCase: TransactionUseCases) => TransactionInfo | undefined;
 
   highestTransactionInADay: (

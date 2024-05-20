@@ -182,6 +182,7 @@ export class Transaction implements ITransaction {
           useCase: useCase,
           info: "Most spent category",
           userId: userId,
+          subInfo: `It was ${category}`,
         };
       }
     });
@@ -225,6 +226,7 @@ export class Transaction implements ITransaction {
           category: category,
           useCase: useCase,
           info: "Most earned category",
+          subInfo: `It was ${category}`,
           userId: userId,
         };
       }
@@ -239,21 +241,40 @@ export class Transaction implements ITransaction {
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
 
-    let amount = 0;
+    const map = new Map<string, number>();
+
+    let userId = "";
 
     data.forEach((val) => {
+      userId = val.userId;
       if (val.type === "EXPENSES") {
-        if (parseInt(val.amount) > amount) {
-          amount = parseInt(val.amount);
+        if (!map.has(val.categoryName)) {
+          map.set(val.categoryName, parseInt(val.amount));
+        } else {
+          const currentAmount = map.get(val.categoryName);
 
-          transaction = {
-            useCase: useCase,
-            userId: val.userId,
-            info: "Most spent category",
-            category: val.categoryName,
-            amount: amount.toString(),
-          };
+          if (!currentAmount) return;
+
+          const newAmount = currentAmount + parseInt(val.amount);
+
+          map.set(val.categoryName, newAmount);
         }
+      }
+    });
+
+    let amount = 0;
+
+    map.forEach((currentAmount, categoryName) => {
+      if (currentAmount > amount) {
+        amount = currentAmount;
+        transaction = {
+          userId: userId,
+          info: "The largest you spent",
+          amount: amount.toString(),
+          useCase: useCase,
+          subInfo: `It was ${categoryName}`,
+          category: categoryName,
+        };
       }
     });
 
@@ -266,21 +287,40 @@ export class Transaction implements ITransaction {
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
 
-    let amount = 0;
+    const map = new Map<string, number>();
+
+    let userId = "";
 
     data.forEach((val) => {
+      userId = val.userId;
       if (val.type === "REVENUE") {
-        if (parseInt(val.amount) > amount) {
-          amount = parseInt(val.amount);
+        if (!map.has(val.categoryName)) {
+          map.set(val.categoryName, parseInt(val.amount));
+        } else {
+          const currentAmount = map.get(val.categoryName);
 
-          transaction = {
-            useCase: useCase,
-            userId: val.userId,
-            info: "Most earned category",
-            category: val.categoryName,
-            amount: amount.toString(),
-          };
+          if (!currentAmount) return;
+
+          const newAmount = currentAmount + parseInt(val.amount);
+
+          map.set(val.categoryName, newAmount);
         }
+      }
+    });
+
+    let amount = 0;
+
+    map.forEach((currentAmount, categoryName) => {
+      if (currentAmount > amount) {
+        amount = currentAmount;
+        transaction = {
+          userId: userId,
+          info: "The largest you spent",
+          amount: amount.toString(),
+          useCase: useCase,
+          subInfo: `It was ${categoryName}`,
+          category: categoryName,
+        };
       }
     });
 
@@ -343,7 +383,7 @@ export class Transaction implements ITransaction {
     });
 
     transaction.userId = userId;
-    transaction.info = "Total revenues all time";
+    transaction.info = "Total revenue all time";
     transaction.amount = totalRevenue.toString();
 
     return totalRevenue > 0 ? transaction : undefined;
@@ -440,9 +480,13 @@ export class Transaction implements ITransaction {
       }
     });
 
+    const currentMonth = date.toLocaleDateString("en-US", {
+      month: "long",
+    });
+
     transaction.userId = userId;
     transaction.info = `${count} Transactions this month`;
-    transaction.subInfo = `Current month is ${date.getMonth()}`;
+    transaction.subInfo = `Current month is ${currentMonth}`;
 
     return count > 0 ? transaction : undefined;
   };
@@ -483,6 +527,48 @@ export class Transaction implements ITransaction {
 
     transaction.userId = userId;
     transaction.info = "Total expenses this month";
+    transaction.amount = totalExpenses.toString();
+    transaction.subInfo = `Current month is ${currentMonth}`;
+
+    return totalExpenses > 0 ? transaction : undefined;
+  };
+
+  currentMonthRevenues = (
+    data: TransactionData[],
+    useCase: TransactionUseCases
+  ): TransactionInfo | undefined => {
+    const transaction: TransactionInfo | undefined = {
+      info: "",
+      useCase: useCase,
+      userId: "",
+    };
+
+    const date = new Date();
+
+    let totalExpenses = 0;
+
+    let userId = "";
+
+    data.forEach((val) => {
+      const conditionMet =
+        val.createdAt.getMonth() === date.getMonth() &&
+        val.createdAt.getFullYear() === date.getFullYear();
+
+      if (conditionMet) {
+        userId = val.userId;
+
+        if (val.type === "REVENUE") {
+          totalExpenses = parseInt(val.amount) + totalExpenses;
+        }
+      }
+    });
+
+    const currentMonth = date.toLocaleDateString("en-US", {
+      month: "long",
+    });
+
+    transaction.userId = userId;
+    transaction.info = "Total revenue this month";
     transaction.amount = totalExpenses.toString();
     transaction.subInfo = `Current month is ${currentMonth}`;
 
@@ -565,8 +651,8 @@ export class Transaction implements ITransaction {
         });
 
         transaction = {
-          info: `${highestCount} Transactions in ${formattedDate}`,
-          subInfo: `It was ${formattedDay}`,
+          info: `${highestCount} transactions`,
+          subInfo: `It was at ${formattedDate}`,
           userId: userId,
           useCase: useCase,
         };
@@ -723,6 +809,9 @@ export class Transaction implements ITransaction {
 
       case "CURRENT_MONTH_EXPENSES_INFO":
         return this.currentMonthExpenses(data, useCases) as TransactionReturnType<typeof useCases>;
+
+      case "CURRENT_MONTH_REVENUE_INFO":
+        return this.currentMonthRevenues(data, useCases) as TransactionReturnType<typeof useCases>;
 
       case "NET_INCOME_INFO":
         return this.netIncome(data, useCases) as TransactionReturnType<typeof useCases>;
