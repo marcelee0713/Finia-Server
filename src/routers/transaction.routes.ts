@@ -41,15 +41,17 @@ const transactionRouter = express.Router();
 
 const controller = container.get<TransactionController>(INTERFACE_TYPE.TransactionController);
 
+transactionRouter.post(
+  "/create",
+  transactionCUDRateLimit,
+  (req, res, next) => middleware.handleReq(req, res, next),
+  validateBody(createSchema),
+  controller.onCreateTransaction.bind(controller)
+);
+
 transactionRouter
   .route("/")
   .post(
-    transactionCUDRateLimit,
-    (req, res, next) => middleware.handleReq(req, res, next),
-    validateBody(createSchema),
-    controller.onCreateTransaction.bind(controller)
-  )
-  .get(
     transactionReadRateLimit,
     (req, res, next) => middleware.handleReq(req, res, next),
     validateBody(getSchema),

@@ -158,12 +158,12 @@ export class Transaction implements ITransaction {
       userId = transaction.userId;
       if (transaction.type === "EXPENSES") {
         if (!map.has(transaction.categoryName)) {
-          map.set(transaction.categoryName, parseInt(transaction.amount));
+          map.set(transaction.categoryName, parseFloat(transaction.amount));
         } else {
           const amount = map.get(transaction.categoryName);
 
           if (amount) {
-            const addAmount = amount + parseInt(transaction.amount);
+            const addAmount = amount + parseFloat(transaction.amount);
             map.set(transaction.categoryName, addAmount);
           }
         }
@@ -182,7 +182,7 @@ export class Transaction implements ITransaction {
           useCase: useCase,
           info: "Most spent category",
           userId: userId,
-          subInfo: `It was ${category}`,
+          subInfo: `It's ${category}`,
         };
       }
     });
@@ -203,12 +203,12 @@ export class Transaction implements ITransaction {
       userId = transaction.userId;
       if (transaction.type === "REVENUE") {
         if (!map.has(transaction.categoryName)) {
-          map.set(transaction.categoryName, parseInt(transaction.amount));
+          map.set(transaction.categoryName, parseFloat(transaction.amount));
         } else {
           const amount = map.get(transaction.categoryName);
 
           if (amount) {
-            const addAmount = amount + parseInt(transaction.amount);
+            const addAmount = amount + parseFloat(transaction.amount);
             map.set(transaction.categoryName, addAmount);
           }
         }
@@ -226,7 +226,7 @@ export class Transaction implements ITransaction {
           category: category,
           useCase: useCase,
           info: "Most earned category",
-          subInfo: `It was ${category}`,
+          subInfo: `It's ${category}`,
           userId: userId,
         };
       }
@@ -249,13 +249,13 @@ export class Transaction implements ITransaction {
       userId = val.userId;
       if (val.type === "EXPENSES") {
         if (!map.has(val.categoryName)) {
-          map.set(val.categoryName, parseInt(val.amount));
+          map.set(val.categoryName, parseFloat(val.amount));
         } else {
           const currentAmount = map.get(val.categoryName);
 
           if (!currentAmount) return;
 
-          const newAmount = currentAmount + parseInt(val.amount);
+          const newAmount = currentAmount + parseFloat(val.amount);
 
           map.set(val.categoryName, newAmount);
         }
@@ -272,7 +272,7 @@ export class Transaction implements ITransaction {
           info: "The largest you spent",
           amount: amount.toString(),
           useCase: useCase,
-          subInfo: `It was ${categoryName}`,
+          subInfo: `It's ${categoryName}`,
           category: categoryName,
         };
       }
@@ -295,13 +295,13 @@ export class Transaction implements ITransaction {
       userId = val.userId;
       if (val.type === "REVENUE") {
         if (!map.has(val.categoryName)) {
-          map.set(val.categoryName, parseInt(val.amount));
+          map.set(val.categoryName, parseFloat(val.amount));
         } else {
           const currentAmount = map.get(val.categoryName);
 
           if (!currentAmount) return;
 
-          const newAmount = currentAmount + parseInt(val.amount);
+          const newAmount = currentAmount + parseFloat(val.amount);
 
           map.set(val.categoryName, newAmount);
         }
@@ -318,7 +318,7 @@ export class Transaction implements ITransaction {
           info: "The largest you spent",
           amount: amount.toString(),
           useCase: useCase,
-          subInfo: `It was ${categoryName}`,
+          subInfo: `It's ${categoryName}`,
           category: categoryName,
         };
       }
@@ -347,7 +347,7 @@ export class Transaction implements ITransaction {
       userId = val.userId;
 
       if (val.type === "EXPENSES") {
-        totalExpenses = parseInt(val.amount) + totalExpenses;
+        totalExpenses = parseFloat(val.amount) + totalExpenses;
       }
     });
 
@@ -378,7 +378,7 @@ export class Transaction implements ITransaction {
       userId = val.userId;
 
       if (val.type === "REVENUE") {
-        totalRevenue = parseInt(val.amount) + totalRevenue;
+        totalRevenue = parseFloat(val.amount) + totalRevenue;
       }
     });
 
@@ -432,7 +432,7 @@ export class Transaction implements ITransaction {
           userId: userId,
           useCase: useCase,
           info: `${map.size} Transactions this day`,
-          subInfo: `It was ${category}`,
+          subInfo: `It's ${category}`,
         };
       }
     });
@@ -516,7 +516,7 @@ export class Transaction implements ITransaction {
         userId = val.userId;
 
         if (val.type === "EXPENSES") {
-          totalExpenses = parseInt(val.amount) + totalExpenses;
+          totalExpenses = parseFloat(val.amount) + totalExpenses;
         }
       }
     });
@@ -558,7 +558,7 @@ export class Transaction implements ITransaction {
         userId = val.userId;
 
         if (val.type === "REVENUE") {
-          totalExpenses = parseInt(val.amount) + totalExpenses;
+          totalExpenses = parseFloat(val.amount) + totalExpenses;
         }
       }
     });
@@ -596,15 +596,15 @@ export class Transaction implements ITransaction {
       userId = val.userId;
 
       if (val.type === "EXPENSES") {
-        totalExpenses = parseInt(val.amount) + totalExpenses;
-      } else totalRevenue = parseInt(val.amount) + totalRevenue;
+        totalExpenses = parseFloat(val.amount) + totalExpenses;
+      } else totalRevenue = parseFloat(val.amount) + totalRevenue;
     });
 
     const netIncome = totalRevenue - totalExpenses;
 
     transaction.userId = userId;
     transaction.info = "Net Income";
-    transaction.amount = netIncome.toString();
+    transaction.amount = netIncome.toFixed(2);
 
     return netIncome ? transaction : undefined;
   };
@@ -667,7 +667,26 @@ export class Transaction implements ITransaction {
     type: TransactionTypes,
     useCase: TransactionUseCases
   ): MonthlyTransactions | undefined => {
+    const allMonths: Months[] = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
     const map = new Map<string, MonthTransaction>();
+
+    allMonths.forEach((month) => {
+      map.set(month, { month: month, amount: "0" });
+    });
 
     const currentDate = new Date();
 
@@ -678,29 +697,22 @@ export class Transaction implements ITransaction {
     };
 
     data.forEach((val) => {
-      const date = new Date();
-      const twelveMonthsAgo = new Date(date);
-      twelveMonthsAgo.setMonth(date.getMonth() - 12);
+      const twelveMonthsAgo = new Date(currentDate);
+
+      twelveMonthsAgo.setMonth(currentDate.getMonth() - 12);
 
       if (val.type === type && val.createdAt >= twelveMonthsAgo && val.createdAt < currentDate) {
         const thisMonth = val.createdAt.toLocaleDateString("en-US", {
           month: "short",
         });
 
-        if (!map.has(thisMonth)) {
-          const obj: MonthTransaction = {
-            month: thisMonth as Months,
-            amount: val.amount,
-          };
-
-          map.set(thisMonth, obj);
-        } else {
+        if (map.has(thisMonth)) {
           const currentObj = map.get(thisMonth);
 
           if (currentObj) {
-            const amount = parseInt(val.amount);
+            const amount = parseFloat(val.amount);
 
-            const currentAmount = parseInt(currentObj.amount);
+            const currentAmount = parseFloat(currentObj.amount);
 
             const newAmount = currentAmount + amount;
 
@@ -712,16 +724,13 @@ export class Transaction implements ITransaction {
       }
     });
 
-    map.forEach((val, month) => {
-      const transaction: MonthTransaction = {
-        amount: val.amount,
-        month: month as Months,
-      };
-
-      monthlyTransactions.monthlyTransactions.push(transaction);
+    allMonths.forEach((month) => {
+      if (map.has(month)) {
+        monthlyTransactions.monthlyTransactions.push(map.get(month)!);
+      }
     });
 
-    return monthlyTransactions.monthlyTransactions.length !== 0 ? monthlyTransactions : undefined;
+    return monthlyTransactions.monthlyTransactions.length > 0 ? monthlyTransactions : undefined;
   };
 
   categoryTransactions = (
@@ -749,9 +758,9 @@ export class Transaction implements ITransaction {
         const currentObj = map.get(transaction.categoryName);
 
         if (currentObj) {
-          const amount = parseInt(transaction.amount);
+          const amount = parseFloat(transaction.amount);
 
-          const currentAmount = parseInt(currentObj.amount);
+          const currentAmount = parseFloat(currentObj.amount);
 
           const newAmount = currentAmount + amount;
 

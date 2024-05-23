@@ -41,7 +41,7 @@ export const TransactionCreateSuite = () => {
 
   it(`Should return an error with the type "not-authorized" and status of 401`, async () => {
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -55,7 +55,7 @@ export const TransactionCreateSuite = () => {
   it(`Should return an error with the type "invalid-amount" and status of 400`, async () => {
     createTransactionBody.amount = "1500000HEHE0.000";
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -74,7 +74,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.type = "NOTATYPE";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -98,7 +98,7 @@ export const TransactionCreateSuite = () => {
         HEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEH`;
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -117,7 +117,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "UNKNOWN";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -132,7 +132,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "Food";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);
@@ -148,7 +148,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "Food";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
+      .post("/api/v1/transactions/create")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(createTransactionBody);

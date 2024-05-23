@@ -41,7 +41,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.type = "NOTATYPE";
 
     const response = await request(app)
-      .get("/api/v1/transactions/")
+      .post("/api/v1/transactions/")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(getTransactionBody);
@@ -60,7 +60,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.category = "Food";
 
     const response = await request(app)
-      .get("/api/v1/transactions/")
+      .post("/api/v1/transactions/")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(getTransactionBody);
@@ -74,7 +74,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.category = "Transportation";
 
     const response = await request(app)
-      .get("/api/v1/transactions/")
+      .post("/api/v1/transactions/")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
       .send(getTransactionBody);
