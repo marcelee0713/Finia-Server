@@ -223,7 +223,7 @@ export class UserService implements IUserServiceInteractor {
 
   async changePassword(uid: string, newPassword: string, shouldLogOut: boolean): Promise<void> {
     try {
-      this.entity.validatePassword(uid);
+      this.entity.validatePassword(newPassword);
 
       await this.repository.changePassword(uid, newPassword, shouldLogOut);
     } catch (err) {

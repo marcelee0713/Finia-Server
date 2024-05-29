@@ -178,7 +178,10 @@ export class UserController {
 
       await this.interactor.changePassword(uid, newPassword, removeSessions);
 
-      return res.status(200).json({ res: "Successfully reset your password!" });
+      return res
+        .clearCookie("token")
+        .status(200)
+        .json({ res: "Successfully reset your password!" });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);

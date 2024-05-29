@@ -315,7 +315,7 @@ export class Transaction implements ITransaction {
         amount = currentAmount;
         transaction = {
           userId: userId,
-          info: "The largest you spent",
+          info: "The largest you earned",
           amount: amount.toString(),
           useCase: useCase,
           subInfo: `It's ${categoryName}`,
