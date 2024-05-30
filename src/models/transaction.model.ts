@@ -16,6 +16,7 @@ import {
   TransactionUseCases,
   isTransactionUseCase,
 } from "../types/transaction.types";
+import { formatDateToReadableString } from "../utils/date-converter";
 
 @injectable()
 export class Transaction implements ITransaction {
@@ -617,19 +618,21 @@ export class Transaction implements ITransaction {
 
     let transaction: TransactionInfo | undefined;
 
-    const map = new Map<Date, number>();
+    const map = new Map<string, number>();
 
     let userId = "";
 
     data.forEach((val) => {
       userId = val.userId;
-      if (!map.has(val.createdAt)) {
-        map.set(val.createdAt, 1);
+
+      const date = formatDateToReadableString(val.createdAt.toString());
+      if (!map.has(date)) {
+        map.set(date, 1);
       } else {
-        const currentAmount = map.get(val.createdAt);
+        const currentAmount = map.get(date);
         if (currentAmount) {
           const newAmount = currentAmount + 1;
-          map.set(val.createdAt, newAmount);
+          map.set(date, newAmount);
         }
       }
     });
@@ -640,19 +643,9 @@ export class Transaction implements ITransaction {
       if (amount > highestCount) {
         highestCount = amount;
 
-        const formattedDate = thisDate.toLocaleDateString("en-US", {
-          month: "short",
-          day: "2-digit",
-          year: "numeric",
-        });
-
-        const formattedDay = thisDate.toLocaleDateString("en-US", {
-          month: "long",
-        });
-
         transaction = {
           info: `${highestCount} transactions`,
-          subInfo: `It was at ${formattedDate}`,
+          subInfo: `It was at ${thisDate}`,
           userId: userId,
           useCase: useCase,
         };
