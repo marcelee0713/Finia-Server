@@ -39,12 +39,17 @@ export class TransactionController {
 
   async onGetTransaction(req: Request, res: Response) {
     try {
-      const userId = req.body.userId;
+      const userId = res.locals.uid;
       const type = req.body.type;
       const category = req.body.category;
       const useCase = req.body.useCase;
       const skip = req.body.skip;
       const take = req.body.take;
+      const minAmount = req.body.minAmount;
+      const maxAmount = req.body.maxAmount;
+      const amountOrder = req.body.amountOrder;
+      const dateOrder = req.body.dateOrder;
+      const noteOrder = req.body.noteOrder;
 
       const transactions = await this.interactor.getTransactions(
         userId,
@@ -52,7 +57,12 @@ export class TransactionController {
         category,
         useCase,
         skip,
-        take
+        take,
+        minAmount,
+        maxAmount,
+        amountOrder,
+        dateOrder,
+        noteOrder
       );
 
       return res.status(transactions ? 200 : 204).json(transactions ?? {});

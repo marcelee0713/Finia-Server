@@ -34,8 +34,10 @@ export const isTransactionUseCase = (useCase: string): useCase is TransactionUse
   return useCase in TransactionUseCases;
 };
 
+export type SortOrder = "asc" | "desc" | undefined;
+
 export type TransactionReturnType<T extends TransactionUseCases> = T extends "DEFAULT"
-  ? TransactionData[]
+  ? TransactionData
   : T extends `${infer R}_INFO`
     ? TransactionInfo
     : MonthlyTransactions | CategoryTransactions;

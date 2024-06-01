@@ -2,6 +2,7 @@ import { beforeEach, it, expect } from "@jest/globals";
 import request from "supertest";
 import { app } from "../..";
 import { GetUID } from "../setup";
+import { TransactionData } from "../../interfaces/transaction.interface";
 
 export const TransactionReadSuite = () => {
   const loginBody = {
@@ -65,8 +66,10 @@ export const TransactionReadSuite = () => {
       .set("Content-Type", "application/json")
       .send(getTransactionBody);
 
+    const resBody: TransactionData = response.body;
+
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(2);
+    expect(resBody.filteredLength).toBe("2");
   });
 
   it("Should get only 0 transaction", async () => {
@@ -79,8 +82,10 @@ export const TransactionReadSuite = () => {
       .set("Content-Type", "application/json")
       .send(getTransactionBody);
 
+    const resBody: TransactionData = response.body;
+
     expect(response.status).toBe(200);
-    expect(response.body).toHaveLength(0);
+    expect(resBody.filteredLength).toBe("0");
   });
 
   it(`Should log out the user`, async () => {

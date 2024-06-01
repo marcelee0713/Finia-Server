@@ -120,15 +120,15 @@ export class Transaction implements ITransaction {
   }
 
   totalTransactions = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    if (data.length === 0) return undefined;
+    if (res.data.length === 0) return undefined;
 
     let revenueCount = 0;
     let expensesCount = 0;
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       if (val.type === "EXPENSES") {
         expensesCount++;
       } else {
@@ -138,8 +138,8 @@ export class Transaction implements ITransaction {
 
     const transaction: TransactionInfo = {
       useCase: useCase,
-      userId: data[0].userId,
-      info: `${data.length} transactions`,
+      userId: res.data[0].userId,
+      info: `${res.data.length} transactions`,
       subInfo: `${revenueCount} revenues : ${expensesCount} expenses`,
     };
 
@@ -147,7 +147,7 @@ export class Transaction implements ITransaction {
   };
 
   mostSpentCategory = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
@@ -155,7 +155,7 @@ export class Transaction implements ITransaction {
     const map = new Map<string, number>();
     let userId = "";
 
-    data.forEach((transaction) => {
+    res.data.forEach((transaction) => {
       userId = transaction.userId;
       if (transaction.type === "EXPENSES") {
         if (!map.has(transaction.categoryName)) {
@@ -192,7 +192,7 @@ export class Transaction implements ITransaction {
   };
 
   mostEarnedCategory = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
@@ -200,7 +200,7 @@ export class Transaction implements ITransaction {
     const map = new Map<string, number>();
     let userId = "";
 
-    data.forEach((transaction) => {
+    res.data.forEach((transaction) => {
       userId = transaction.userId;
       if (transaction.type === "REVENUE") {
         if (!map.has(transaction.categoryName)) {
@@ -237,7 +237,7 @@ export class Transaction implements ITransaction {
   };
 
   largestExpense = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
@@ -246,7 +246,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
       if (val.type === "EXPENSES") {
         if (!map.has(val.categoryName)) {
@@ -283,7 +283,7 @@ export class Transaction implements ITransaction {
   };
 
   largestRevenue = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
@@ -292,7 +292,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
       if (val.type === "REVENUE") {
         if (!map.has(val.categoryName)) {
@@ -329,10 +329,10 @@ export class Transaction implements ITransaction {
   };
 
   totalExpenses = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    if (data.length === 0) return undefined;
+    if (res.data.length === 0) return undefined;
 
     const transaction: TransactionInfo | undefined = {
       userId: "",
@@ -344,7 +344,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
 
       if (val.type === "EXPENSES") {
@@ -360,10 +360,10 @@ export class Transaction implements ITransaction {
   };
 
   totalRevenues = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    if (data.length === 0) return undefined;
+    if (res.data.length === 0) return undefined;
 
     const transaction: TransactionInfo | undefined = {
       userId: "",
@@ -375,7 +375,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
 
       if (val.type === "REVENUE") {
@@ -391,7 +391,7 @@ export class Transaction implements ITransaction {
   };
 
   totalTransactionThisDay = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     let transaction: TransactionInfo | undefined;
@@ -402,7 +402,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
       const conditionMet =
         val.createdAt.getDate() === date.getDate() &&
@@ -442,7 +442,7 @@ export class Transaction implements ITransaction {
   };
 
   totalTransactionThisMonth = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     const transaction: TransactionInfo | undefined = {
@@ -459,7 +459,7 @@ export class Transaction implements ITransaction {
 
     const map = new Map<string, number>();
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
       const conditionMet =
         val.createdAt.getMonth() === date.getMonth() &&
@@ -493,7 +493,7 @@ export class Transaction implements ITransaction {
   };
 
   currentMonthExpenses = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     const transaction: TransactionInfo | undefined = {
@@ -508,7 +508,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       const conditionMet =
         val.createdAt.getMonth() === date.getMonth() &&
         val.createdAt.getFullYear() === date.getFullYear();
@@ -535,7 +535,7 @@ export class Transaction implements ITransaction {
   };
 
   currentMonthRevenues = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
     const transaction: TransactionInfo | undefined = {
@@ -550,7 +550,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       const conditionMet =
         val.createdAt.getMonth() === date.getMonth() &&
         val.createdAt.getFullYear() === date.getFullYear();
@@ -576,11 +576,8 @@ export class Transaction implements ITransaction {
     return totalExpenses > 0 ? transaction : undefined;
   };
 
-  netIncome = (
-    data: TransactionData[],
-    useCase: TransactionUseCases
-  ): TransactionInfo | undefined => {
-    if (data.length === 0) return undefined;
+  netIncome = (res: TransactionData, useCase: TransactionUseCases): TransactionInfo | undefined => {
+    if (res.data.length === 0) return undefined;
     const transaction: TransactionInfo | undefined = {
       info: "",
       useCase: useCase,
@@ -593,7 +590,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
 
       if (val.type === "EXPENSES") {
@@ -611,10 +608,10 @@ export class Transaction implements ITransaction {
   };
 
   highestTransactionInADay = (
-    data: TransactionData[],
+    res: TransactionData,
     useCase: TransactionUseCases
   ): TransactionInfo | undefined => {
-    if (data.length === 0) return undefined;
+    if (res.data.length === 0) return undefined;
 
     let transaction: TransactionInfo | undefined;
 
@@ -622,7 +619,7 @@ export class Transaction implements ITransaction {
 
     let userId = "";
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       userId = val.userId;
 
       const date = formatDateToReadableString(val.createdAt.toString());
@@ -656,7 +653,7 @@ export class Transaction implements ITransaction {
   };
 
   monthlyTransactions = (
-    data: TransactionData[],
+    res: TransactionData,
     type: TransactionTypes,
     useCase: TransactionUseCases
   ): MonthlyTransactions | undefined => {
@@ -689,7 +686,7 @@ export class Transaction implements ITransaction {
       monthlyTransactions: [],
     };
 
-    data.forEach((val) => {
+    res.data.forEach((val) => {
       const twelveMonthsAgo = new Date(currentDate);
 
       twelveMonthsAgo.setMonth(currentDate.getMonth() - 12);
@@ -727,7 +724,7 @@ export class Transaction implements ITransaction {
   };
 
   categoryTransactions = (
-    data: TransactionData[],
+    res: TransactionData,
     type: TransactionTypes,
     useCase: TransactionUseCases
   ): CategoryTransactions | undefined => {
@@ -739,7 +736,7 @@ export class Transaction implements ITransaction {
       useCase: useCase,
     };
 
-    data.forEach((transaction) => {
+    res.data.forEach((transaction) => {
       if (!map.has(transaction.categoryName) && transaction.type === type) {
         const obj: TotalAmountInCategory = {
           categoryName: transaction.categoryName,
@@ -772,7 +769,7 @@ export class Transaction implements ITransaction {
   };
 
   dto = (
-    data: TransactionData[],
+    data: TransactionData,
     useCases: TransactionUseCases | string | undefined
   ): TransactionReturnType<TransactionUseCases> => {
     if (!useCases || !isTransactionUseCase(useCases)) return data;

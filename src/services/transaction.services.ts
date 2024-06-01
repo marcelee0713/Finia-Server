@@ -5,6 +5,7 @@ import {
   ITransactionServiceInteractor,
 } from "../interfaces/transaction.interface";
 import {
+  SortOrder,
   TransactionReturnType,
   TransactionTypes,
   TransactionUseCases,
@@ -47,7 +48,12 @@ export class TransactionService implements ITransactionServiceInteractor {
     category?: string,
     useCase?: string,
     skip?: string,
-    take?: string
+    take?: string,
+    minAmount?: string,
+    maxAmount?: string,
+    amountOrder?: SortOrder,
+    dateOrder?: SortOrder,
+    noteOrder?: SortOrder
   ): Promise<TransactionReturnType<TransactionUseCases>> {
     try {
       if (type) this.entity.validateType(type);
@@ -57,7 +63,12 @@ export class TransactionService implements ITransactionServiceInteractor {
         type as TransactionTypes,
         category,
         skip ? parseInt(skip) : undefined,
-        take ? parseInt(take) : undefined
+        take ? parseInt(take) : undefined,
+        minAmount ? parseFloat(minAmount) : undefined,
+        maxAmount ? parseFloat(maxAmount) : undefined,
+        amountOrder,
+        dateOrder,
+        noteOrder
       );
 
       const object = this.entity.dto(transactions, useCase);

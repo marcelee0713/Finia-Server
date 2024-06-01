@@ -12,12 +12,16 @@ export const createSchema = z.object({
 
 export const getSchema = z.object({
   body: z.object({
-    userId: z.string().trim(),
     type: z.string().toUpperCase().trim().optional(),
     category: z.string().trim().optional(),
     useCase: z.string().trim().optional(),
+    minAmount: z.string().trim().optional(),
+    maxAmount: z.string().trim().optional(),
     skip: z.string().trim().optional(),
     take: z.string().trim().optional(),
+    amountOrder: z.string().trim().optional(),
+    dateOrder: z.string().trim().optional(),
+    noteOrder: z.string().trim().optional(),
   }),
 });
 

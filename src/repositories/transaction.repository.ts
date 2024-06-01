@@ -1,9 +1,14 @@
 import { injectable } from "inversify";
-import { ITransactionRepository, TransactionData } from "../interfaces/transaction.interface";
-import { TransactionTypes } from "../types/transaction.types";
+import {
+  ITransactionRepository,
+  Transaction,
+  TransactionData,
+} from "../interfaces/transaction.interface";
+import { SortOrder, TransactionTypes } from "../types/transaction.types";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { ErrorType } from "../types/error.types";
+import { skipAndTake, skipArr, takeArr } from "../utils/skip_and_take";
 
 @injectable()
 export class TransactionRepository implements ITransactionRepository {
@@ -58,10 +63,18 @@ export class TransactionRepository implements ITransactionRepository {
     type?: TransactionTypes,
     category?: string,
     skip?: number,
-    take?: number
-  ): Promise<TransactionData[]> {
-    const list: TransactionData[] = [];
+    take?: number,
+    minAmount?: number,
+    maxAmount?: number,
+    amountOrder?: SortOrder,
+    dateOrder?: SortOrder,
+    noteOrder?: SortOrder
+  ): Promise<TransactionData> {
+    let filteredLength = "0";
+    let length = "0";
+
     let transactions = [];
+
     try {
       const _category =
         category &&
@@ -75,106 +88,110 @@ export class TransactionRepository implements ITransactionRepository {
         throw new Error("category-does-not-exist" as ErrorType);
       }
 
-      if (type && _category) {
-        transactions = await this.prismaClient.transactions.findMany({
-          where: {
-            user_id: userId,
-            type: type,
-            category_id: _category.uid,
-            categories: {
-              uid: _category.uid,
-              category: category,
+      transactions = await this.prismaClient.transactions.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          categories: {
+            select: {
+              category: true,
             },
           },
-          include: {
-            categories: {
-              select: {
-                category: true,
-              },
-            },
+        },
+        orderBy: [
+          {
+            amount: amountOrder,
           },
-          skip: skip,
-          take: take,
-          orderBy: {
-            created_at: "asc",
+          {
+            created_at: dateOrder,
           },
-        });
-      } else if (type && !category) {
-        transactions = await this.prismaClient.transactions.findMany({
-          where: {
-            user_id: userId,
-            type: type,
+          {
+            note: noteOrder,
           },
-          include: {
-            categories: {
-              select: {
-                category: true,
-              },
-            },
-          },
-          skip: skip,
-          take: take,
-          orderBy: {
-            created_at: "asc",
-          },
-        });
-      } else if (!type && _category) {
-        transactions = await this.prismaClient.transactions.findMany({
-          where: {
-            user_id: userId,
-            category_id: _category.uid,
-            categories: {
-              uid: _category.uid,
-              category: category,
-            },
-          },
-          include: {
-            categories: {
-              select: {
-                category: true,
-              },
-            },
-          },
-          skip: skip,
-          take: take,
-          orderBy: {
-            created_at: "asc",
-          },
-        });
-      } else {
-        transactions = await this.prismaClient.transactions.findMany({
-          where: {
-            user_id: userId,
-          },
-          include: {
-            categories: {
-              select: {
-                category: true,
-              },
-            },
-          },
-          skip: skip,
-          take: take,
-          orderBy: {
-            created_at: "asc",
-          },
-        });
+        ],
+      });
+
+      length = transactions.length.toString();
+      filteredLength = transactions.length.toString();
+
+      if (minAmount && maxAmount) {
+        transactions = transactions.filter(
+          (transaction) =>
+            transaction.amount.toNumber() >= minAmount && transaction.amount.toNumber() <= maxAmount
+        );
+
+        filteredLength = transactions.length.toString();
+      } else if (minAmount && !maxAmount) {
+        transactions = transactions.filter(
+          (transaction) => transaction.amount.toNumber() >= minAmount
+        );
+
+        filteredLength = transactions.length.toString();
+      } else if (!minAmount && maxAmount) {
+        transactions = transactions.filter(
+          (transaction) => transaction.amount.toNumber() <= maxAmount
+        );
+
+        filteredLength = transactions.length.toString();
       }
 
+      if (type && _category) {
+        const filtered = transactions.filter((val) => {
+          return val.type === type && val.category_id === _category.uid;
+        });
+
+        filteredLength = filtered.length.toString();
+
+        transactions = filtered;
+      } else if (type && !category) {
+        const filtered = (transactions = transactions.filter((val) => {
+          return val.type === type;
+        }));
+
+        filteredLength = filtered.length.toString();
+
+        transactions = filtered;
+      } else if (!type && _category) {
+        const filtered = transactions.filter((val) => {
+          return val.category_id === _category.uid;
+        });
+
+        filteredLength = filtered.length.toString();
+
+        transactions = filtered;
+      }
+
+      if (skip && take) {
+        transactions = skipAndTake(transactions, skip, take);
+      } else if (skip && !take) {
+        transactions = skipArr(transactions, skip);
+      } else if (!skip && take) {
+        transactions = takeArr(transactions, take);
+      }
+
+      const data: Transaction[] = [];
+
       transactions.forEach((val) => {
-        list.push({
+        data.push({
+          categoryName: val.categories.category,
           uid: val.uid,
           userId: val.user_id,
           categoryId: val.category_id,
-          categoryName: val.categories.category,
           amount: val.amount.toString(),
-          createdAt: val.created_at,
           type: val.type,
+          createdAt: val.created_at,
           note: val.note ?? undefined,
         });
       });
 
-      return list;
+      const obj: TransactionData = {
+        data: data,
+        filteredLength: filteredLength,
+        length: length,
+      };
+
+      return obj;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");

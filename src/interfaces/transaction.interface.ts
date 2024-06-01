@@ -1,5 +1,6 @@
 import {
   Months,
+  SortOrder,
   TransactionReturnType,
   TransactionTypes,
   TransactionUseCases,
@@ -76,81 +77,81 @@ export interface ITransaction {
   validate: (amount: string, type: string, note: string | undefined) => void;
 
   totalTransactions: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   mostSpentCategory: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   mostEarnedCategory: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   largestExpense: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   largestRevenue: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   totalExpenses: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   totalRevenues: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   totalTransactionThisDay: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   totalTransactionThisMonth: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   currentMonthExpenses: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   currentMonthRevenues: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
-  netIncome: (data: TransactionData[], useCase: TransactionUseCases) => TransactionInfo | undefined;
+  netIncome: (data: TransactionData, useCase: TransactionUseCases) => TransactionInfo | undefined;
 
   highestTransactionInADay: (
-    data: TransactionData[],
+    data: TransactionData,
     useCase: TransactionUseCases
   ) => TransactionInfo | undefined;
 
   monthlyTransactions: (
-    data: TransactionData[],
+    data: TransactionData,
     type: TransactionTypes,
     useCase: TransactionUseCases
   ) => MonthlyTransactions | undefined;
 
   categoryTransactions: (
-    data: TransactionData[],
+    data: TransactionData,
     type: TransactionTypes,
     useCase: TransactionUseCases
   ) => CategoryTransactions | undefined;
 
   dto: (
-    data: TransactionData[],
+    data: TransactionData,
     useCases: TransactionUseCases | string | undefined
   ) => TransactionReturnType<TransactionUseCases>;
 }
@@ -180,7 +181,13 @@ export interface TransactionInfo {
   day?: string;
 }
 
-export type TransactionData = ExcludeUnderscores<INonFuncTransaction>;
+export type Transaction = ExcludeUnderscores<INonFuncTransaction>;
+
+export interface TransactionData {
+  data: Transaction[];
+  filteredLength: string;
+  length: string;
+}
 
 export interface ITransactionServiceInteractor {
   createTransaction(
@@ -197,7 +204,12 @@ export interface ITransactionServiceInteractor {
     category?: string,
     useCase?: string,
     skip?: string,
-    take?: string
+    take?: string,
+    minAmount?: string,
+    maxAmount?: string,
+    amountOrder?: string,
+    dateOrder?: string,
+    noteOrder?: string
   ): Promise<TransactionReturnType<TransactionUseCases>>;
 
   updateTransaction(
@@ -226,8 +238,13 @@ export interface ITransactionRepository {
     type?: TransactionTypes,
     category?: string,
     skip?: number,
-    take?: number
-  ): Promise<TransactionData[]>;
+    take?: number,
+    minAmount?: number,
+    maxAmount?: number,
+    amountOrder?: SortOrder,
+    dateOrder?: SortOrder,
+    noteOrder?: SortOrder
+  ): Promise<TransactionData>;
 
   update(
     uid: string,
