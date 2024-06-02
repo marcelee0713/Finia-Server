@@ -17,15 +17,23 @@ export class TransactionController {
 
   async onCreateTransaction(req: Request, res: Response) {
     try {
-      const userId = req.body.userId;
+      const userId = res.locals.uid;
       const type = req.body.type;
       const amount = req.body.amount;
       const category = req.body.category;
+      const date: string | undefined = req.body.date;
       const note: string | undefined = req.body.note;
 
-      await this.interactor.createTransaction(userId, type, amount, category, note);
+      const obj = await this.interactor.createTransaction(
+        userId,
+        type,
+        amount,
+        category,
+        date,
+        note
+      );
 
-      return res.status(200).json({ res: "Successfully created a transaction!" });
+      return res.status(200).json(obj);
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -80,15 +88,24 @@ export class TransactionController {
   async onUpdateTransaction(req: Request, res: Response) {
     try {
       const uid = req.body.uid;
-      const userId = req.body.userId;
+      const userId = res.locals.uid;
       const type: string | undefined = req.body.type;
       const amount: string | undefined = req.body.amount;
       const category: string | undefined = req.body.category;
+      const date: string | undefined = req.body.date;
       const note: string | undefined = req.body.note;
 
-      await this.interactor.updateTransaction(uid, userId, amount, type, category, note);
+      const obj = await this.interactor.updateTransaction(
+        uid,
+        userId,
+        amount,
+        type,
+        category,
+        date,
+        note
+      );
 
-      return res.status(200).json({ res: "Successfully updated your transaction!" });
+      return res.status(200).json(obj);
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -103,7 +120,7 @@ export class TransactionController {
   async onDeleteTransaction(req: Request, res: Response) {
     try {
       const uid = req.body.uid;
-      const userId = req.body.userId;
+      const userId = res.locals.uid;
 
       await this.interactor.deleteTransaction(uid, userId);
 

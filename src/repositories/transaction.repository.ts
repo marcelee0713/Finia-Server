@@ -8,7 +8,7 @@ import { SortOrder, TransactionTypes } from "../types/transaction.types";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { ErrorType } from "../types/error.types";
-import { skipAndTake, skipArr, takeArr } from "../utils/skip_and_take";
+import { skipAndTake } from "../utils/skip-and-take";
 
 @injectable()
 export class TransactionRepository implements ITransactionRepository {
@@ -23,8 +23,9 @@ export class TransactionRepository implements ITransactionRepository {
     type: TransactionTypes,
     amount: string | number,
     category: string,
+    date?: Date,
     note?: string | undefined
-  ): Promise<void> {
+  ): Promise<Transaction> {
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {
@@ -43,15 +44,27 @@ export class TransactionRepository implements ITransactionRepository {
 
       if (!_category) throw new Error("category-does-not-exist" as ErrorType);
 
-      await this.prismaClient.transactions.create({
+      const res = await this.prismaClient.transactions.create({
         data: {
           user_id: user.uid,
           category_id: _category.uid,
           amount: amount,
           type: type,
           note: note && note,
+          created_at: date ?? new Date(),
         },
       });
+
+      return {
+        uid: res.uid,
+        categoryName: _category.category,
+        userId: res.user_id,
+        categoryId: _category.uid,
+        type: res.type,
+        createdAt: res.created_at,
+        amount: res.amount.toString(),
+        note: res.note ?? "",
+      };
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
@@ -162,13 +175,7 @@ export class TransactionRepository implements ITransactionRepository {
         transactions = filtered;
       }
 
-      if (skip && take) {
-        transactions = skipAndTake(transactions, skip, take);
-      } else if (skip && !take) {
-        transactions = skipArr(transactions, skip);
-      } else if (!skip && take) {
-        transactions = takeArr(transactions, take);
-      }
+      transactions = skipAndTake(transactions, skip, take);
 
       const data: Transaction[] = [];
 
@@ -204,8 +211,9 @@ export class TransactionRepository implements ITransactionRepository {
     amount?: string | undefined,
     type?: TransactionTypes | undefined,
     category?: string | undefined,
+    date?: Date,
     note?: string
-  ): Promise<void> {
+  ): Promise<Transaction> {
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {
@@ -234,7 +242,7 @@ export class TransactionRepository implements ITransactionRepository {
 
       if (category && !_category) throw new Error("category-does-not-exist" as ErrorType);
 
-      await this.prismaClient.transactions.update({
+      const res = await this.prismaClient.transactions.update({
         where: {
           uid: uid,
           user_id: user.uid,
@@ -244,8 +252,23 @@ export class TransactionRepository implements ITransactionRepository {
           type: type ?? transaction.type,
           category_id: _category ? _category.uid : transaction.category_id,
           note: note ?? transaction.note,
+          created_at: date ?? transaction.created_at,
+        },
+        include: {
+          categories: true,
         },
       });
+
+      return {
+        uid: res.uid,
+        categoryName: res.categories.category,
+        userId: res.user_id,
+        categoryId: res.category_id,
+        type: res.type,
+        createdAt: res.created_at,
+        amount: res.amount.toString(),
+        note: res.note ?? "",
+      };
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");

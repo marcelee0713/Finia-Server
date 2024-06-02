@@ -110,7 +110,19 @@ export class Transaction implements ITransaction {
   }
 
   validateNote(enteredNote: string | undefined) {
-    if (enteredNote && enteredNote.length > 255) throw new Error("invalid-note" as ErrorType);
+    if (enteredNote && enteredNote.length > 50) throw new Error("invalid-note" as ErrorType);
+  }
+
+  validateDate(enteredDate: string | undefined): Date | undefined {
+    if (!enteredDate) return undefined;
+
+    const date = new Date(enteredDate);
+
+    if (isNaN(date.getTime())) {
+      throw new Error("invalid-date" as ErrorType);
+    }
+
+    return date;
   }
 
   validate(amount: string, type: string, note: string | undefined) {

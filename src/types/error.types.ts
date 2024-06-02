@@ -12,6 +12,7 @@ export type ErrorType =
   | "invalid-transaction-type"
   | "invalid-note"
   | "invalid-password-reset-request"
+  | "invalid-date"
   | "email-service-error"
   | "email-dev-error"
   | "email-dev-req-error"

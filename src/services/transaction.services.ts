@@ -3,6 +3,7 @@ import {
   ITransaction,
   ITransactionRepository,
   ITransactionServiceInteractor,
+  Transaction,
 } from "../interfaces/transaction.interface";
 import {
   SortOrder,
@@ -30,12 +31,17 @@ export class TransactionService implements ITransactionServiceInteractor {
     type: TransactionTypes,
     amount: string,
     category: string,
+    date?: string | undefined,
     note?: string | undefined
-  ): Promise<void> {
+  ): Promise<Transaction> {
     try {
       this.entity.validate(amount, type, note);
 
-      await this.repository.create(userId, type, amount, category, note);
+      const formattedDate = this.entity.validateDate(date);
+
+      const res = await this.repository.create(userId, type, amount, category, formattedDate, note);
+
+      return res;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
@@ -86,8 +92,9 @@ export class TransactionService implements ITransactionServiceInteractor {
     amount?: string,
     type?: TransactionTypes,
     category?: string,
+    date?: string,
     note?: string
-  ): Promise<void> {
+  ): Promise<Transaction> {
     try {
       if (type) this.entity.validateType(type);
 
@@ -95,7 +102,19 @@ export class TransactionService implements ITransactionServiceInteractor {
 
       if (note) this.entity.validateNote(note);
 
-      await this.repository.update(uid, userId, amount, type, category, note);
+      const formattedDate = this.entity.validateDate(date);
+
+      const res = await this.repository.update(
+        uid,
+        userId,
+        amount,
+        type,
+        category,
+        formattedDate,
+        note
+      );
+
+      return res;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");

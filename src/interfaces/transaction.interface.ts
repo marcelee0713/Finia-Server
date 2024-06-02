@@ -74,6 +74,8 @@ export interface ITransaction {
 
   validateNote: (enteredNote: string | undefined) => void;
 
+  validateDate: (enteredDate: string | undefined) => Date | undefined;
+
   validate: (amount: string, type: string, note: string | undefined) => void;
 
   totalTransactions: (
@@ -195,8 +197,9 @@ export interface ITransactionServiceInteractor {
     type: string,
     amount: string,
     category: string,
+    date?: string,
     note?: string
-  ): Promise<void>;
+  ): Promise<Transaction>;
 
   getTransactions(
     userId: string,
@@ -218,8 +221,9 @@ export interface ITransactionServiceInteractor {
     amount?: string,
     type?: string,
     category?: string,
+    date?: string,
     note?: string
-  ): Promise<void>;
+  ): Promise<Transaction>;
 
   deleteTransaction(uid: string, userId: string): Promise<void>;
 }
@@ -230,8 +234,9 @@ export interface ITransactionRepository {
     type: TransactionTypes,
     amount: string,
     category: string,
+    date?: Date,
     note?: string
-  ): Promise<void>;
+  ): Promise<Transaction>;
 
   get(
     userId: string,
@@ -252,8 +257,9 @@ export interface ITransactionRepository {
     amount?: string,
     type?: TransactionTypes,
     category?: string,
+    date?: Date,
     note?: string
-  ): Promise<void>;
+  ): Promise<Transaction>;
 
   delete(uid: string, userId: string): Promise<void>;
 }

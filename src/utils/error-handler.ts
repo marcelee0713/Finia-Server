@@ -57,7 +57,7 @@ export const handleError = (err: ErrorType): ErrorObject => {
       return errObj;
 
     case "invalid-note":
-      errObj.message = "Transaction notes should be less than 255 characters!";
+      errObj.message = "Transaction notes should be less than 50 characters!";
       errObj.status = "400";
       return errObj;
 
@@ -78,6 +78,11 @@ export const handleError = (err: ErrorType): ErrorObject => {
 
     case "invalid-email":
       errObj.message = "Email is not valid, please follow the format!";
+      errObj.status = "400";
+      return errObj;
+
+    case "invalid-date":
+      errObj.message = "Date is not valid";
       errObj.status = "400";
       return errObj;
 
