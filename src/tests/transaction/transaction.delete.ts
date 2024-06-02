@@ -42,12 +42,10 @@ export const TransasctionDeleteSuite = () => {
       .delete("/api/v1/transactions")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
-      .send({ userId: "abcd123", uid: deleteBody.uid });
+      .send({ uid: deleteBody.uid });
 
-    expect(response.body).toHaveProperty("message", "User does not exist!");
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty("status", "404");
-    expect(response.body).toHaveProperty("type", "user-does-not-exist");
+    expect(response.body).toHaveProperty("res", "Successfully deleted your transaction!");
+    expect(response.status).toBe(200);
   });
 
   it(`Should return an error with the type "transaction-does-not-exist" and status of 404`, async () => {
@@ -55,7 +53,7 @@ export const TransasctionDeleteSuite = () => {
       .delete("/api/v1/transactions")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
-      .send({ userId: deleteBody.userId, uid: "juan12342" });
+      .send({ uid: "juan12342" });
 
     expect(response.body).toHaveProperty("message", "Transaction does not exist!");
     expect(response.status).toBe(404);
@@ -68,7 +66,7 @@ export const TransasctionDeleteSuite = () => {
       .delete("/api/v1/transactions/")
       .set("Cookie", [`token=${tokenSession}`])
       .set("Content-Type", "application/json")
-      .send(deleteBody);
+      .send({ uid: deleteBody.uid });
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("res", "Successfully deleted your transaction!");
