@@ -86,6 +86,21 @@ export const handleError = (err: ErrorType): ErrorObject => {
       errObj.status = "400";
       return errObj;
 
+    case "invalid-min-max":
+      errObj.message = "Invalid min and max amount!";
+      errObj.status = "400";
+      return errObj;
+
+    case "invalid-order":
+      errObj.message = "Invalid order, input should be asc and desc!";
+      errObj.status = "400";
+      return errObj;
+
+    case "invalid-pagination":
+      errObj.message = "Please enter whole numbers only!";
+      errObj.status = "400";
+      return errObj;
+
     case "transaction-does-not-exist":
       errObj.message = "Transaction does not exist!";
       errObj.status = "404";

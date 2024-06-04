@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
-import { ITransactionServiceInteractor } from "../interfaces/transaction.interface";
+import {
+  CreateTransactionReqBody,
+  GetTransactionReqBody,
+  ITransactionServiceInteractor,
+  UpdateTransactionReqBody,
+} from "../interfaces/transaction.interface";
 import { INTERFACE_TYPE } from "../utils";
 import { handleError } from "../utils/error-handler";
 import { ErrorType } from "../types/error.types";
@@ -17,21 +22,14 @@ export class TransactionController {
 
   async onCreateTransaction(req: Request, res: Response) {
     try {
-      const userId = res.locals.uid;
-      const type = req.body.type;
-      const amount = req.body.amount;
-      const category = req.body.category;
-      const date: string | undefined = req.body.date;
-      const note: string | undefined = req.body.note;
+      const reqObj: CreateTransactionReqBody = {
+        body: {
+          userId: res.locals.uid,
+          ...req.body,
+        },
+      };
 
-      const obj = await this.interactor.createTransaction(
-        userId,
-        type,
-        amount,
-        category,
-        date,
-        note
-      );
+      const obj = await this.interactor.createTransaction({ ...reqObj.body });
 
       return res.status(200).json(obj);
     } catch (err) {
@@ -47,31 +45,14 @@ export class TransactionController {
 
   async onGetTransaction(req: Request, res: Response) {
     try {
-      const userId = res.locals.uid;
-      const type = req.body.type;
-      const category = req.body.category;
-      const useCase = req.body.useCase;
-      const skip = req.body.skip;
-      const take = req.body.take;
-      const minAmount = req.body.minAmount;
-      const maxAmount = req.body.maxAmount;
-      const amountOrder = req.body.amountOrder;
-      const dateOrder = req.body.dateOrder;
-      const noteOrder = req.body.noteOrder;
+      const reqObj: GetTransactionReqBody = {
+        body: {
+          userId: res.locals.uid,
+          ...req.body,
+        },
+      };
 
-      const transactions = await this.interactor.getTransactions(
-        userId,
-        type,
-        category,
-        useCase,
-        skip,
-        take,
-        minAmount,
-        maxAmount,
-        amountOrder,
-        dateOrder,
-        noteOrder
-      );
+      const transactions = await this.interactor.getTransactions({ ...reqObj.body });
 
       return res.status(transactions ? 200 : 204).json(transactions ?? {});
     } catch (err) {
@@ -87,23 +68,14 @@ export class TransactionController {
 
   async onUpdateTransaction(req: Request, res: Response) {
     try {
-      const uid = req.body.uid;
-      const userId = res.locals.uid;
-      const type: string | undefined = req.body.type;
-      const amount: string | undefined = req.body.amount;
-      const category: string | undefined = req.body.category;
-      const date: string | undefined = req.body.date;
-      const note: string | undefined = req.body.note;
+      const reqObj: UpdateTransactionReqBody = {
+        body: {
+          userId: res.locals.uid,
+          ...req.body,
+        },
+      };
 
-      const obj = await this.interactor.updateTransaction(
-        uid,
-        userId,
-        amount,
-        type,
-        category,
-        date,
-        note
-      );
+      const obj = await this.interactor.updateTransaction({ ...reqObj.body });
 
       return res.status(200).json(obj);
     } catch (err) {

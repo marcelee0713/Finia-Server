@@ -1,9 +1,14 @@
 import {
   CategoryTransactions,
+  CreateTransactionReqBody,
+  GetTransactionReqBody,
+  INonFuncTransaction,
   MonthlyTransactions,
   TransactionData,
   TransactionInfo,
+  UpdateTransactionReqBody,
 } from "../interfaces/transaction.interface";
+import { ExcludeUnderscores } from "../utils/type-modifications";
 
 export type TransactionTypes = "EXPENSES" | "REVENUE";
 
@@ -32,6 +37,47 @@ export type TransactionUseCases = keyof typeof TransactionUseCases;
 
 export const isTransactionUseCase = (useCase: string): useCase is TransactionUseCases => {
   return useCase in TransactionUseCases;
+};
+
+export type Transaction = ExcludeUnderscores<INonFuncTransaction>;
+
+export type CreateTransactionsParams = CreateTransactionReqBody["body"];
+
+export type GetTransactionsParams = GetTransactionReqBody["body"];
+
+export type UpdateTransactionParams = UpdateTransactionReqBody["body"];
+
+export type GetParams = Omit<
+  GetTransactionsParams,
+  "type" | "minAmount" | "maxAmount" | "skip" | "take" | "dateOrder" | "noteOrder" | "amountOrder"
+> & {
+  type?: TransactionTypes;
+  amountOrder?: SortOrder;
+  dateOrder?: SortOrder;
+  noteOrder?: SortOrder;
+} & AmountFilter &
+  Pagination;
+
+export type CreateParams = Omit<CreateTransactionsParams, "amount" | "type" | "date"> & {
+  type: TransactionTypes;
+  amount: number;
+  date?: Date;
+};
+
+export type UpdateParams = Omit<UpdateTransactionParams, "amount" | "type" | "date"> & {
+  type?: TransactionTypes;
+  amount?: number;
+  date?: Date;
+};
+
+export type AmountFilter = {
+  minAmount?: number;
+  maxAmount?: number;
+};
+
+export type Pagination = {
+  skip?: number;
+  take?: number;
 };
 
 export type SortOrder = "asc" | "desc" | undefined;

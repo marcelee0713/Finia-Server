@@ -1,14 +1,11 @@
 import { injectable } from "inversify";
-import {
-  ITransactionRepository,
-  Transaction,
-  TransactionData,
-} from "../interfaces/transaction.interface";
-import { SortOrder, TransactionTypes } from "../types/transaction.types";
+import { ITransactionRepository, TransactionData } from "../interfaces/transaction.interface";
+import { CreateParams, GetParams, Transaction, UpdateParams } from "../types/transaction.types";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { ErrorType } from "../types/error.types";
-import { skipAndTake } from "../utils/skip-and-take";
+import { skipAndTake } from "../utils/filters/skip-and-take";
+import { filter } from "../utils/filters";
 
 @injectable()
 export class TransactionRepository implements ITransactionRepository {
@@ -18,14 +15,7 @@ export class TransactionRepository implements ITransactionRepository {
     this.prismaClient = db;
   }
 
-  async create(
-    userId: string,
-    type: TransactionTypes,
-    amount: string | number,
-    category: string,
-    date?: Date,
-    note?: string | undefined
-  ): Promise<Transaction> {
+  async create({ amount, category, type, userId, date, note }: CreateParams): Promise<Transaction> {
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {
@@ -71,25 +61,25 @@ export class TransactionRepository implements ITransactionRepository {
     }
   }
 
-  async get(
-    userId: string,
-    type?: TransactionTypes,
-    category?: string,
-    skip?: number,
-    take?: number,
-    minAmount?: number,
-    maxAmount?: number,
-    amountOrder?: SortOrder,
-    dateOrder?: SortOrder,
-    noteOrder?: SortOrder
-  ): Promise<TransactionData> {
+  async get({
+    userId,
+    category,
+    type,
+    minAmount,
+    maxAmount,
+    skip,
+    take,
+    amountOrder,
+    dateOrder,
+    noteOrder,
+  }: GetParams): Promise<TransactionData> {
     let filteredLength = "0";
     let length = "0";
 
     let transactions = [];
 
     try {
-      const _category =
+      const cat =
         category &&
         (await this.prismaClient.categories.findFirst({
           where: {
@@ -97,7 +87,7 @@ export class TransactionRepository implements ITransactionRepository {
           },
         }));
 
-      if (category && !_category) {
+      if (category && !cat) {
         throw new Error("category-does-not-exist" as ErrorType);
       }
 
@@ -128,52 +118,25 @@ export class TransactionRepository implements ITransactionRepository {
       length = transactions.length.toString();
       filteredLength = transactions.length.toString();
 
-      if (minAmount && maxAmount) {
-        transactions = transactions.filter(
-          (transaction) =>
-            transaction.amount.toNumber() >= minAmount && transaction.amount.toNumber() <= maxAmount
-        );
+      transactions = filter(transactions, (val) => {
+        const amount = val.amount.toNumber();
 
-        filteredLength = transactions.length.toString();
-      } else if (minAmount && !maxAmount) {
-        transactions = transactions.filter(
-          (transaction) => transaction.amount.toNumber() >= minAmount
-        );
+        if (minAmount && maxAmount) return amount >= minAmount && amount <= maxAmount;
+        if (minAmount && !maxAmount) return amount >= minAmount;
+        if (!minAmount && maxAmount) return amount <= maxAmount;
 
-        filteredLength = transactions.length.toString();
-      } else if (!minAmount && maxAmount) {
-        transactions = transactions.filter(
-          (transaction) => transaction.amount.toNumber() <= maxAmount
-        );
+        return true;
+      });
 
-        filteredLength = transactions.length.toString();
-      }
+      transactions = filter(transactions, (val) => {
+        if (type && cat) return val.type === type && val.category_id === cat.uid;
+        if (type && !cat) return val.type === type;
+        if (!type && cat) return val.category_id === cat.uid;
 
-      if (type && _category) {
-        const filtered = transactions.filter((val) => {
-          return val.type === type && val.category_id === _category.uid;
-        });
+        return true;
+      });
 
-        filteredLength = filtered.length.toString();
-
-        transactions = filtered;
-      } else if (type && !category) {
-        const filtered = (transactions = transactions.filter((val) => {
-          return val.type === type;
-        }));
-
-        filteredLength = filtered.length.toString();
-
-        transactions = filtered;
-      } else if (!type && _category) {
-        const filtered = transactions.filter((val) => {
-          return val.category_id === _category.uid;
-        });
-
-        filteredLength = filtered.length.toString();
-
-        transactions = filtered;
-      }
+      filteredLength = transactions.length.toString();
 
       transactions = skipAndTake(transactions, skip, take);
 
@@ -205,15 +168,15 @@ export class TransactionRepository implements ITransactionRepository {
     }
   }
 
-  async update(
-    uid: string,
-    userId: string,
-    amount?: string | undefined,
-    type?: TransactionTypes | undefined,
-    category?: string | undefined,
-    date?: Date,
-    note?: string
-  ): Promise<Transaction> {
+  async update({
+    uid,
+    userId,
+    amount,
+    category,
+    date,
+    note,
+    type,
+  }: UpdateParams): Promise<Transaction> {
     try {
       const user = await this.prismaClient.user.findFirst({
         where: {

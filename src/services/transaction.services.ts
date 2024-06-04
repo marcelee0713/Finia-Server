@@ -3,13 +3,14 @@ import {
   ITransaction,
   ITransactionRepository,
   ITransactionServiceInteractor,
-  Transaction,
 } from "../interfaces/transaction.interface";
 import {
-  SortOrder,
+  CreateTransactionsParams,
+  GetTransactionsParams,
+  Transaction,
   TransactionReturnType,
-  TransactionTypes,
   TransactionUseCases,
+  UpdateTransactionParams,
 } from "../types/transaction.types";
 import { INTERFACE_TYPE } from "../utils";
 
@@ -26,22 +27,13 @@ export class TransactionService implements ITransactionServiceInteractor {
     this.entity = transactionEntity;
   }
 
-  async createTransaction(
-    userId: string,
-    type: TransactionTypes,
-    amount: string,
-    category: string,
-    date?: string | undefined,
-    note?: string | undefined
-  ): Promise<Transaction> {
+  async createTransaction(params: CreateTransactionsParams): Promise<Transaction> {
     try {
-      this.entity.validate(amount, type, note);
+      const result = this.entity.createValidation(params);
 
-      const formattedDate = this.entity.validateDate(date);
+      const data = await this.repository.create(result);
 
-      const res = await this.repository.create(userId, type, amount, category, formattedDate, note);
-
-      return res;
+      return data;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");
@@ -49,35 +41,14 @@ export class TransactionService implements ITransactionServiceInteractor {
   }
 
   async getTransactions(
-    userId: string,
-    type?: string,
-    category?: string,
-    useCase?: string,
-    skip?: string,
-    take?: string,
-    minAmount?: string,
-    maxAmount?: string,
-    amountOrder?: SortOrder,
-    dateOrder?: SortOrder,
-    noteOrder?: SortOrder
+    params: GetTransactionsParams
   ): Promise<TransactionReturnType<TransactionUseCases>> {
     try {
-      if (type) this.entity.validateType(type);
+      const result = this.entity.getValidation(params);
 
-      const transactions = await this.repository.get(
-        userId,
-        type as TransactionTypes,
-        category,
-        skip ? parseInt(skip) : undefined,
-        take ? parseInt(take) : undefined,
-        minAmount ? parseFloat(minAmount) : undefined,
-        maxAmount ? parseFloat(maxAmount) : undefined,
-        amountOrder,
-        dateOrder,
-        noteOrder
-      );
+      const data = await this.repository.get(result);
 
-      const object = this.entity.dto(transactions, useCase);
+      const object = this.entity.dto(data, params.useCase);
 
       return object;
     } catch (err) {
@@ -86,35 +57,13 @@ export class TransactionService implements ITransactionServiceInteractor {
     }
   }
 
-  async updateTransaction(
-    uid: string,
-    userId: string,
-    amount?: string,
-    type?: TransactionTypes,
-    category?: string,
-    date?: string,
-    note?: string
-  ): Promise<Transaction> {
+  async updateTransaction(params: UpdateTransactionParams): Promise<Transaction> {
     try {
-      if (type) this.entity.validateType(type);
+      const result = this.entity.updateValidation(params);
 
-      if (amount) this.entity.validateAmount(amount);
+      const data = await this.repository.update(result);
 
-      if (note) this.entity.validateNote(note);
-
-      const formattedDate = this.entity.validateDate(date);
-
-      const res = await this.repository.update(
-        uid,
-        userId,
-        amount,
-        type,
-        category,
-        formattedDate,
-        note
-      );
-
-      return res;
+      return data;
     } catch (err) {
       if (err instanceof Error) throw new Error(err.message);
       throw new Error("Internal server error");

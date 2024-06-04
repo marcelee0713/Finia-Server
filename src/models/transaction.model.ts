@@ -10,10 +10,19 @@ import {
 } from "../interfaces/transaction.interface";
 import { ErrorType } from "../types/error.types";
 import {
+  AmountFilter,
+  CreateParams,
+  CreateTransactionsParams,
+  GetParams,
+  GetTransactionsParams,
   Months,
+  Pagination,
+  SortOrder,
   TransactionReturnType,
   TransactionTypes,
   TransactionUseCases,
+  UpdateParams,
+  UpdateTransactionParams,
   isTransactionUseCase,
 } from "../types/transaction.types";
 import { formatDateToReadableString } from "../utils/date-converter";
@@ -88,7 +97,9 @@ export class Transaction implements ITransaction {
     this._note = note;
   };
 
-  validateAmount(enteredAmount: string) {
+  validateAmount(enteredAmount: string | undefined): number | undefined {
+    if (!enteredAmount) return undefined;
+
     const validNumberRegex = /^[0-9]+(\.[0-9]+)?$/;
 
     if (!validNumberRegex.test(enteredAmount)) throw new Error("invalid-amount" as ErrorType);
@@ -101,16 +112,24 @@ export class Transaction implements ITransaction {
     if (wholeNumbers.length > 12 || (decimalPlaces && decimalPlaces.length > 2)) {
       throw new Error("invalid-amount");
     }
+
+    return parseFloat(enteredAmount);
   }
 
-  validateType(enteredType: string) {
+  validateType(enteredType: string | undefined): TransactionTypes | undefined {
+    if (!enteredType) return undefined;
+
     if (!(enteredType === "EXPENSES" || enteredType === "REVENUE")) {
       throw new Error("invalid-transaction-type" as ErrorType);
     }
+
+    return enteredType as TransactionTypes;
   }
 
-  validateNote(enteredNote: string | undefined) {
-    if (enteredNote && enteredNote.length > 50) throw new Error("invalid-note" as ErrorType);
+  validateNote(enteredNote: string | undefined): string | undefined {
+    if (!enteredNote) return undefined;
+
+    if (enteredNote.length > 50) throw new Error("invalid-note" as ErrorType);
   }
 
   validateDate(enteredDate: string | undefined): Date | undefined {
@@ -125,10 +144,101 @@ export class Transaction implements ITransaction {
     return date;
   }
 
-  validate(amount: string, type: string, note: string | undefined) {
-    this.validateAmount(amount);
-    this.validateType(type);
-    this.validateNote(note);
+  validateMinAndMax(enteredMin?: string, enteredMax?: string): AmountFilter {
+    const min = this.validateAmount(enteredMin);
+    const max = this.validateAmount(enteredMax);
+
+    if (min && max) {
+      if (min > max) throw new Error("invalid-min-max" as ErrorType);
+      if (max < min) throw new Error("invalid-min-max" as ErrorType);
+
+      return {
+        minAmount: min,
+        maxAmount: max,
+      };
+    }
+
+    return {
+      minAmount: min,
+      maxAmount: max,
+    };
+  }
+
+  validateOrder(enteredOrder?: string): SortOrder {
+    if (!enteredOrder) return undefined;
+
+    if (!(enteredOrder === "asc" || enteredOrder === "desc")) {
+      throw new Error("invalid-order" as ErrorType);
+    }
+
+    return enteredOrder;
+  }
+
+  validateSkipAndTake(enteredSkip?: string, enteredTake?: string): Pagination {
+    let skip: number | undefined;
+
+    let take: number | undefined;
+
+    if (enteredSkip) {
+      skip = parseInt(enteredSkip);
+
+      if (isNaN(skip)) throw new Error("invalid-pagination" as ErrorType);
+    }
+
+    if (enteredTake) {
+      take = parseInt(enteredTake);
+
+      if (isNaN(take)) throw new Error("invalid-pagination" as ErrorType);
+    }
+
+    return {
+      skip,
+      take,
+    };
+  }
+
+  createValidation(params: CreateTransactionsParams): CreateParams {
+    this.validateAmount(params.amount);
+    this.validateType(params.type);
+
+    return {
+      ...params,
+      amount: parseFloat(params.amount),
+      type: params.type as TransactionTypes,
+      note: this.validateNote(params.note),
+      date: this.validateDate(params.date),
+    };
+  }
+
+  getValidation(params: GetTransactionsParams): GetParams {
+    const pagination = this.validateSkipAndTake(params.skip, params.take);
+    const amountFilter = this.validateMinAndMax(params.minAmount, params.maxAmount);
+
+    return {
+      ...params,
+      userId: params.userId,
+      type: this.validateType(params.type),
+      minAmount: amountFilter.minAmount,
+      maxAmount: amountFilter.maxAmount,
+      skip: pagination.skip,
+      take: pagination.take,
+      amountOrder: this.validateOrder(params.amountOrder),
+      dateOrder: this.validateOrder(params.dateOrder),
+      noteOrder: this.validateOrder(params.noteOrder),
+    };
+  }
+
+  updateValidation(params: UpdateTransactionParams): UpdateParams {
+    this.validateAmount(params.amount);
+    this.validateType(params.type);
+
+    return {
+      ...params,
+      amount: this.validateAmount(params.amount),
+      type: this.validateType(params.type),
+      note: this.validateNote(params.note),
+      date: this.validateDate(params.date),
+    };
   }
 
   totalTransactions = (

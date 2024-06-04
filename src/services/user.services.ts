@@ -111,14 +111,7 @@ export class UserService implements IUserServiceInteractor {
         useCases: ["DEFAULT"],
       });
 
-      return {
-        uid: data.uid,
-        username: data.username,
-        email: data.email,
-        emailVerified: data.emailVerified,
-        createdAt: data.createdAt,
-        role: data.role,
-      };
+      return data;
     } catch (err) {
       if (err instanceof Error) {
         throw Error(err.message);

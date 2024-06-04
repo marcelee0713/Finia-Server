@@ -1,13 +1,22 @@
 import {
+  AmountFilter,
+  CreateParams,
+  CreateTransactionsParams,
+  GetParams,
+  GetTransactionsParams,
   Months,
+  Pagination,
   SortOrder,
+  Transaction,
   TransactionReturnType,
   TransactionTypes,
   TransactionUseCases,
+  UpdateParams,
+  UpdateTransactionParams,
 } from "../types/transaction.types";
-import { ExcludeFunctions, ExcludeUnderscores } from "../utils/type-modifications";
+import { ExcludeFunctions } from "../utils/type-modifications";
 
-interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {
+export interface INonFuncTransaction extends ExcludeFunctions<ITransaction> {
   categoryName: string;
 }
 
@@ -19,6 +28,76 @@ export interface MonthTransaction {
 export interface TotalAmountInCategory {
   categoryName: string;
   amount: string;
+}
+
+export interface CategoryTransactions {
+  type: TransactionTypes;
+  data: TotalAmountInCategory[];
+  useCase: TransactionUseCases;
+}
+
+export interface MonthlyTransactions {
+  type: TransactionTypes;
+  monthlyTransactions: MonthTransaction[];
+  useCase: TransactionUseCases;
+}
+
+export interface TransactionInfo {
+  userId: string;
+  useCase: TransactionUseCases;
+  info: string;
+  subInfo?: string;
+  category?: string;
+  amount?: string;
+  note?: string;
+  date?: string;
+  month?: string;
+  day?: string;
+}
+
+export interface TransactionData {
+  data: Transaction[];
+  filteredLength: string;
+  length: string;
+}
+
+export interface CreateTransactionReqBody {
+  body: {
+    userId: string;
+    type: string;
+    category: string;
+    amount: string;
+    date?: string;
+    note?: string;
+  };
+}
+
+export interface GetTransactionReqBody {
+  body: {
+    userId: string;
+    type?: string;
+    category?: string;
+    useCase?: string;
+    minAmount?: string;
+    maxAmount?: string;
+    skip?: string;
+    take?: string;
+    amountOrder?: string;
+    dateOrder?: string;
+    noteOrder?: string;
+  };
+}
+
+export interface UpdateTransactionReqBody {
+  body: {
+    userId: string;
+    uid: string;
+    type?: string;
+    category?: string;
+    amount?: string;
+    date?: string;
+    note?: string;
+  };
 }
 
 export interface ITransaction {
@@ -68,15 +147,25 @@ export interface ITransaction {
 
   setNote: (note: string) => void;
 
-  validateAmount: (enteredAmount: string) => void;
+  validateAmount: (enteredAmount?: string) => number | undefined;
 
-  validateType: (enteredType: string) => void;
+  validateType: (enteredType?: string) => TransactionTypes | undefined;
 
-  validateNote: (enteredNote: string | undefined) => void;
+  validateNote: (enteredNote?: string) => string | undefined;
 
-  validateDate: (enteredDate: string | undefined) => Date | undefined;
+  validateDate: (enteredDate?: string) => Date | undefined;
 
-  validate: (amount: string, type: string, note: string | undefined) => void;
+  validateMinAndMax: (enteredMin?: string, enteredMax?: string) => AmountFilter;
+
+  validateOrder: (enteredOrder?: string) => SortOrder;
+
+  validateSkipAndTake: (enteredSkip?: string, enteredTake?: string) => Pagination;
+
+  createValidation: (params: CreateTransactionsParams) => CreateParams;
+
+  getValidation: (params: GetTransactionsParams) => GetParams;
+
+  updateValidation: (params: UpdateTransactionParams) => UpdateParams;
 
   totalTransactions: (
     data: TransactionData,
@@ -158,108 +247,24 @@ export interface ITransaction {
   ) => TransactionReturnType<TransactionUseCases>;
 }
 
-export interface CategoryTransactions {
-  type: TransactionTypes;
-  data: TotalAmountInCategory[];
-  useCase: TransactionUseCases;
-}
-
-export interface MonthlyTransactions {
-  type: TransactionTypes;
-  monthlyTransactions: MonthTransaction[];
-  useCase: TransactionUseCases;
-}
-
-export interface TransactionInfo {
-  userId: string;
-  useCase: TransactionUseCases;
-  info: string;
-  subInfo?: string;
-  category?: string;
-  amount?: string;
-  note?: string;
-  date?: string;
-  month?: string;
-  day?: string;
-}
-
-export type Transaction = ExcludeUnderscores<INonFuncTransaction>;
-
-export interface TransactionData {
-  data: Transaction[];
-  filteredLength: string;
-  length: string;
-}
-
 export interface ITransactionServiceInteractor {
-  createTransaction(
-    userId: string,
-    type: string,
-    amount: string,
-    category: string,
-    date?: string,
-    note?: string
-  ): Promise<Transaction>;
+  createTransaction(params: CreateTransactionsParams): Promise<Transaction>;
 
   getTransactions(
-    userId: string,
-    type?: string,
-    category?: string,
-    useCase?: string,
-    skip?: string,
-    take?: string,
-    minAmount?: string,
-    maxAmount?: string,
-    amountOrder?: string,
-    dateOrder?: string,
-    noteOrder?: string
+    params: GetTransactionsParams
   ): Promise<TransactionReturnType<TransactionUseCases>>;
 
-  updateTransaction(
-    uid: string,
-    userId: string,
-    amount?: string,
-    type?: string,
-    category?: string,
-    date?: string,
-    note?: string
-  ): Promise<Transaction>;
+  updateTransaction(params: UpdateTransactionParams): Promise<Transaction>;
 
   deleteTransaction(uid: string, userId: string): Promise<void>;
 }
 
 export interface ITransactionRepository {
-  create(
-    userId: string,
-    type: TransactionTypes,
-    amount: string,
-    category: string,
-    date?: Date,
-    note?: string
-  ): Promise<Transaction>;
+  create(params: CreateParams): Promise<Transaction>;
 
-  get(
-    userId: string,
-    type?: TransactionTypes,
-    category?: string,
-    skip?: number,
-    take?: number,
-    minAmount?: number,
-    maxAmount?: number,
-    amountOrder?: SortOrder,
-    dateOrder?: SortOrder,
-    noteOrder?: SortOrder
-  ): Promise<TransactionData>;
+  get(params: GetParams): Promise<TransactionData>;
 
-  update(
-    uid: string,
-    userId: string,
-    amount?: string,
-    type?: TransactionTypes,
-    category?: string,
-    date?: Date,
-    note?: string
-  ): Promise<Transaction>;
+  update(params: UpdateParams): Promise<Transaction>;
 
   delete(uid: string, userId: string): Promise<void>;
 }
