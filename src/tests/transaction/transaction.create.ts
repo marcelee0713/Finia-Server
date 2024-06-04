@@ -15,6 +15,7 @@ export const TransactionCreateSuite = () => {
     amount: "1500",
     category: "Food",
     note: "Longganisa para sa umaga!",
+    date: "",
   };
 
   beforeEach(async () => {
@@ -128,7 +129,28 @@ export const TransactionCreateSuite = () => {
     expect(response.body).toHaveProperty("type", "category-does-not-exist");
   });
 
+  it(`Should return an error with the type "invalid-date" and status of 400`, async () => {
+    createTransactionBody.note = "Longganisa para sa umaga!";
+    createTransactionBody.category = "Food";
+    createTransactionBody.date = "JAN2020201";
+
+    const response = await request(app)
+      .post("/api/v1/transactions/create")
+      .set("Cookie", [`token=${tokenSession}`])
+      .set("Content-Type", "application/json")
+      .send(createTransactionBody);
+
+    expect(response.body).toHaveProperty("message", "Date is not valid");
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("status", "400");
+    expect(response.body).toHaveProperty("type", "invalid-date");
+  });
+
   it("Should create the first transaction", async () => {
+    createTransactionBody.date = "";
+    createTransactionBody.amount = "1500.00";
+    createTransactionBody.type = "EXPENSES";
+    createTransactionBody.note = "Longganisa para sa umaga!";
     createTransactionBody.category = "Food";
 
     const response = await request(app)

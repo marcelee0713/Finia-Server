@@ -51,7 +51,7 @@ export const GetTransasctionUID = async (username: string): Promise<string> => {
   });
 
   if (!res) {
-    return "";
+    throw new Error("User does not have any transactions");
   }
 
   return res.uid;

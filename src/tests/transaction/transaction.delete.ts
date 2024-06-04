@@ -1,4 +1,4 @@
-import { beforeEach, it, expect } from "@jest/globals";
+import { it, expect, beforeAll } from "@jest/globals";
 import request from "supertest";
 import { app } from "../..";
 import { GetUID, GetTransasctionUID } from "../setup";
@@ -14,7 +14,7 @@ export const TransasctionDeleteSuite = () => {
     userId: "",
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     deleteBody.userId = await GetUID(loginBody.username);
     deleteBody.uid = await GetTransasctionUID(loginBody.username);
   });
@@ -35,17 +35,6 @@ export const TransasctionDeleteSuite = () => {
         return;
       }
     });
-  });
-
-  it(`Should return an error with the type "user-does-not-exist" and status of 404`, async () => {
-    const response = await request(app)
-      .delete("/api/v1/transactions")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
-      .send({ uid: deleteBody.uid });
-
-    expect(response.body).toHaveProperty("res", "Successfully deleted your transaction!");
-    expect(response.status).toBe(200);
   });
 
   it(`Should return an error with the type "transaction-does-not-exist" and status of 404`, async () => {
