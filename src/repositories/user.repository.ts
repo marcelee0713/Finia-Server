@@ -1,17 +1,21 @@
-import { IUserRepository, UserObject } from "../interfaces/user.interface";
+import { IUserRepository, UnverifiedUser, UserObject } from "../interfaces/user.interface";
 import * as bcrypt from "bcrypt";
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { RedisClientType, redisClient } from "../db/redis";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { db } from "../db/db.server";
 import { UserParams } from "../types/user.types";
 import { ErrorType } from "../types/error.types";
+import { IJWTService } from "../interfaces/jwt.interface";
+import { INTERFACE_TYPE } from "../utils/appConst";
 
 @injectable()
 export class UserRepository implements IUserRepository {
   private prismaClient: PrismaClient;
+  private token: IJWTService;
 
-  constructor() {
+  constructor(@inject(INTERFACE_TYPE.JWTServices) token: IJWTService) {
+    this.token = token;
     this.prismaClient = db;
   }
 
@@ -121,6 +125,98 @@ export class UserRepository implements IUserRepository {
     }
   }
 
+  async removeUnverifiedUsers(): Promise<void> {
+    try {
+      const unverifiedUsers: UnverifiedUser[] = await this.prismaClient.user.findMany({
+        where: {
+          emailVerified: null,
+        },
+        select: {
+          uid: true,
+          created_at: true,
+          emailVerified: true,
+        },
+      });
+
+      const now = new Date();
+
+      const expiredUsers: UnverifiedUser[] = [];
+
+      unverifiedUsers.forEach((user) => {
+        const diffInMilliseconds = now.getTime() - user.created_at.getTime();
+        const diffInDays = diffInMilliseconds / diffInMilliseconds;
+        const passed7Days = diffInDays >= 7;
+
+        if (passed7Days && !user.emailVerified) expiredUsers.push(user);
+      });
+
+      expiredUsers.forEach(async (user) => {
+        await this.prismaClient.user.delete({
+          where: {
+            uid: user.uid,
+          },
+        });
+      });
+    } catch (err) {
+      throw new Error(`Internal server error on Prisma: ${err}`);
+    }
+  }
+
+  async removeExpiredTokens(): Promise<void> {
+    const redis: RedisClientType = await redisClient();
+
+    try {
+      const keys = await redis.KEYS("*");
+
+      keys.forEach(async (key) => {
+        const keyName = key.split(":");
+
+        const keyType = keyName[0];
+
+        const todayTimestamp = Math.floor(Date.now() / 1000);
+
+        // Clear out the expired members basing on the score's value
+        await redis.ZREMRANGEBYSCORE(key, "-inf", todayTimestamp);
+
+        if (keyType === "sessions") {
+          const sessions = await redis.ZRANGE(key, 0, -1);
+
+          for (let i = 0; i < sessions.length; i++) {
+            const token = sessions[i];
+
+            const payload = this.token.getExpPayload(token);
+
+            const isExpired = todayTimestamp > payload.exp;
+
+            if (!isExpired) continue;
+
+            await redis.ZREM(key, token);
+          }
+        }
+
+        if (keyType === "blacklisted_tokens") {
+          const blacklistedTokens = await redis.ZRANGE(key, 0, -1);
+
+          for (let i = 0; i < blacklistedTokens.length; i++) {
+            const token = blacklistedTokens[i];
+
+            const payload = this.token.getExpPayload(token);
+
+            const isExpired = todayTimestamp > payload.exp;
+
+            if (!isExpired) continue;
+
+            await redis.ZREM(key, token);
+          }
+        }
+      });
+    } catch (err) {
+      throw new Error(`Internal server error on Redis: ${err}`);
+    } finally {
+      await redis.disconnect();
+    }
+  }
+
   async checkSession(uid: string, setId: string): Promise<string> {
     const redis: RedisClientType = await redisClient();
 
@@ -135,7 +231,7 @@ export class UserRepository implements IUserRepository {
 
       const todayTimestamp = Math.floor(Date.now() / 1000);
 
-      // Clear out the expired sessions
+      // Clear out the expired sessions basing on the score's value
       await redis.ZREMRANGEBYSCORE(sessionKey, "-inf", todayTimestamp);
 
       const sessions = await redis.ZRANGE(sessionKey, 0, -1);

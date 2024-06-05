@@ -36,6 +36,12 @@ export type UserObject = ExcludeUnderscores<INonFuncUser>;
 
 export type PasswordLessUserObject = Omit<UserObject, "password">;
 
+export interface UnverifiedUser {
+  uid: string;
+  emailVerified: Date | null;
+  created_at: Date;
+}
+
 export interface IUserServiceInteractor {
   createUser(username: string, email: string, password: string): Promise<string>;
   logInUser(username: string, password: string): Promise<string>;
@@ -58,6 +64,8 @@ export interface IUserRepository {
   setSession(uid: string, setId: string, refreshToken: string): Promise<void>;
   checkSession(uid: string, setId: string): Promise<string>;
   removeSession(uid: string, setId: string): Promise<void>;
+  removeUnverifiedUsers(): Promise<void>;
+  removeExpiredTokens(): Promise<void>;
   verifyEmail(uid: string, email: string): Promise<void>;
   checkTokenInBlacklist(uid: string, token: string): Promise<boolean>;
   addTokenToBlacklist(uid: string, token: string): Promise<void>;

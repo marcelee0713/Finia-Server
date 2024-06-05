@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { TOKENS_LIFESPAN } from "../utils";
 import {
   EmailAndResetPayloadType,
+  ExpPayloadType,
   JWTParams,
   PayloadParams,
   PayloadType,
@@ -16,6 +17,12 @@ export class JWTServices implements IJWTService {
 
   constructor() {
     this.jwtClient = jwt;
+  }
+
+  getExpPayload(token: string): ExpPayloadType {
+    const payload = this.jwtClient.decode(token) as ExpPayloadType;
+
+    return payload;
   }
 
   getDecodedPayload({ token, tokenType }: PayloadParams): PayloadType | EmailAndResetPayloadType {

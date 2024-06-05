@@ -10,6 +10,7 @@ export const INTERFACE_TYPE = {
   TransactionEntity: Symbol.for("TransactionEntity"),
   JWTServices: Symbol.for("JWTServices"),
   EmailServices: Symbol.for("EmailServices"),
+  SchedulerServices: Symbol.for("SchedulerServices"),
 };
 
 export const TOKENS_LIFESPAN = {
@@ -28,4 +29,10 @@ export const DEFAULT_RESET_PASS_CONTENT = {
   Name: "Finia",
   Subject: "Finia Reset Password",
   Text: "A request for resetting your password in Finia!",
+};
+
+export const CRON_TIME = {
+  EveryDay: "0 0 * * *",
+  EveryWeek: "0 0 * * 0",
+  Timezone: "Asia/Manila", // Oh no, you know where i lived!
 };

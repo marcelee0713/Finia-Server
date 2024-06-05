@@ -16,6 +16,12 @@ export interface EmailAndResetPayloadType {
   email: string;
 }
 
+export interface ExpPayloadType {
+  uid: string;
+  iat: number;
+  exp: number;
+}
+
 export type TokenType = "REFRESH" | "ACCESS" | "EMAIL" | "PASSRESET";
 
 export interface PayloadParams {

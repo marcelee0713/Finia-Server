@@ -15,11 +15,13 @@ import {
   verifyEmailSchema,
 } from "../schemas/user.schemas";
 import { IJWTService } from "../interfaces/jwt.interface";
+import { ISchedulerService } from "../interfaces/cron.interface";
+import { IEmailService } from "../interfaces/nodemailer.interface";
 import { JWTServices } from "../external-libraries/jwt";
 import { validateBody } from "../middlewares/req.middleware";
 import { UserMiddlewares } from "../middlewares/user.middleware";
-import { IEmailService } from "../interfaces/nodemailer.interface";
 import { EmailServices } from "../external-libraries/nodemailer";
+import { SchedulerServices } from "../external-libraries/scheduler";
 import {
   createAccountRateLimit,
   emailAndPassVerifyingRateLimit,
@@ -37,10 +39,12 @@ container.bind(INTERFACE_TYPE.UserController).to(UserController);
 container.bind(INTERFACE_TYPE.UserMiddlewares).to(UserMiddlewares);
 container.bind<IJWTService>(INTERFACE_TYPE.JWTServices).to(JWTServices);
 container.bind<IEmailService>(INTERFACE_TYPE.EmailServices).to(EmailServices);
+container.bind<ISchedulerService>(INTERFACE_TYPE.SchedulerServices).to(SchedulerServices);
 container.bind<IUser>(INTERFACE_TYPE.UserEntity).to(User);
 
 const userRouter = express.Router();
 
+const scheduler = container.get<ISchedulerService>(INTERFACE_TYPE.SchedulerServices);
 const controller = container.get<UserController>(INTERFACE_TYPE.UserController);
 export const middleware = container.get<UserMiddlewares>(INTERFACE_TYPE.UserMiddlewares);
 
@@ -115,6 +119,8 @@ userRouter.post(
   controller.onPasswordResetReq.bind(controller)
 );
 
-userRouter.post("/middlewareTest", (req, res, next) => middleware.handleReq(req, res, next));
+scheduler.execute().catch((error) => {
+  console.error("Failed to execute scheduler:", error);
+});
 
 export default userRouter;
