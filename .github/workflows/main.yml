@@ -29,8 +29,8 @@ jobs:
 
       - name: Install OpenSSL
         run: |
-          apt-get update
-          apt-get install -y libssl1.1
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1
 
       - name: Build the project
         run: npm run build
