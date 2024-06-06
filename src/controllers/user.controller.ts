@@ -57,6 +57,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 2592000000,
+          sameSite: "none",
         })
         .status(200)
         .json({ token: accessToken });
@@ -207,6 +208,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 2592000000,
+          sameSite: "none",
         })
         .status(200)
         .json(data);
