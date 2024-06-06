@@ -37,6 +37,24 @@ jobs:
         run: npm run test
         env:
           DATABASE_URL: ${{ secrets.DATABASE_DEV_URL }}
+          REDIS_SECRETKEY: ${{ secrets.REDIS_SECRETKEY }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          SECRET_EMAIL_PASSWORD: ${{ secrets.SECRET_EMAIL_PASSWORD }}
+          SECRET_EMAIL: ${{ secrets.SECRET_EMAIL }}
+          SECRET_PROTOCOL: ${{secrets.SECRET_PROTOCOL }}
+          SECRET_DOMAIN: ${{secrets.SECRET_DOMAIN }}
+          SECRET_LOGIN_ROUTE: ${{secrets.SECRET_LOGIN_ROUTE }}
+          SECRET_RESET_PASS_ROUTE: ${{secrets.SECRET_RESET_PASS_ROUTE }}
+          REFRESH_TOKEN_SECRETKEY: ${{secrets.REFRESH_TOKEN_SECRETKEY }}
+          ACCESS_TOKEN_SECRETKEY: ${{secrets.ACCESS_TOKEN_SECRETKEY }}
+          EMAIL_VERIFICATION_SECRETKEY: ${{secrets.EMAIL_VERIFICATION_SECRETKEY }}
+          PASSWORD_RESET_SECRETKEY: ${{secrets.PASSWORD_RESET_SECRETKEY }}
+          SET_ID_CHARACTERS: ${{secrets.SET_ID_CHARACTERS }}
+          CLIENT_BASE_URL: ${{secrets.CLIENT_BASE_URL }}
+          ADMIN_USERNAME: ${{secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD: ${{secrets.ADMIN_PASSWORD }}
+          ADMIN_EMAIL_ADDRESS: ${{secrets.ADMIN_EMAIL_ADDRESS }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v3
