@@ -9,6 +9,7 @@ on:
     branches: [master, main]
     paths:
       - ./prisma/migrations/**
+  workflow_dispatch:
 
 jobs:
   test:
