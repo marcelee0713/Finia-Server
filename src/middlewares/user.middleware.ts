@@ -61,7 +61,7 @@ export class UserMiddlewares {
             httpOnly: true,
             secure: true,
             maxAge: 0,
-            sameSite: "strict",
+            sameSite: "none",
           })
           .status(parseInt(errObj.status))
           .json(errObj);
