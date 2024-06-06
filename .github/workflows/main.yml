@@ -1,4 +1,4 @@
-name: Run Action
+name: CI
 
 on:
   push:
@@ -14,21 +14,21 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
-      cockroach:
-        image: cockroachdb/cockroach:v22.1.10
-        ports:
-          - 26257:26257
+      postgres:
+        image: postgres
         env:
-          COCKROACH_USER: root
-          COCKROACH_DATABASE: testdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
-          --entrypoint=/bin/bash
-          --health-cmd="cockroach sql --insecure -e 'SELECT 1;'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/finia-app
 
     steps:
       - name: Checkout code
@@ -47,24 +47,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libssl1.1
 
-      - name: Download CA Cert
-        run: |
-          mkdir -p $HOME/.postgresql/
-          curl --create-dirs -o $HOME/.postgresql/root.crt '${{ secrets.COCKROACHDB_CERT_URL }}'
-
       - name: Build the project
-        run: npm run build
+        run: npm run build:prod
 
-      - name: Run Tests (Local, Insecure)
+      - name: Print environment variables
+        run: printenv
+
+      - name: Run Tests
         run: npm run test
-        env:
-          DATABASE_URL: postgresql://root@localhost:26257/testdb?sslmode=disable
-
-      - name: Deploy Database Schema (Secure)
-        run: npm run db:deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SSL_CERT_FILE: $HOME/.postgresql/root.crt
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v3
