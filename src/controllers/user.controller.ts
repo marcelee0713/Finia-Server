@@ -57,7 +57,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 2592000000,
-          sameSite: "none",
+          sameSite: "strict",
         })
         .status(200)
         .json({ token: accessToken });
@@ -85,7 +85,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 0,
-          sameSite: "none",
+          sameSite: "strict",
         })
         .status(200)
         .json({ res: "Successfully logged out user" });
@@ -192,7 +192,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 0,
-          sameSite: "none",
+          sameSite: "strict",
         })
         .status(200)
         .json({ res: "Successfully reset your password!" });
@@ -221,7 +221,7 @@ export class UserController {
           httpOnly: true,
           secure: true,
           maxAge: 2592000000,
-          sameSite: "none",
+          sameSite: "strict",
         })
         .status(200)
         .json(data);
@@ -235,7 +235,7 @@ export class UserController {
               httpOnly: true,
               secure: true,
               maxAge: 0,
-              sameSite: "none",
+              sameSite: "strict",
             })
             .status(parseInt(errObj.status))
             .json(errObj);
@@ -267,7 +267,7 @@ export class UserController {
               httpOnly: true,
               secure: true,
               maxAge: 0,
-              sameSite: "none",
+              sameSite: "strict",
             })
             .status(parseInt(errObj.status))
             .json(errObj);
