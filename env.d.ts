@@ -20,7 +20,9 @@ declare global {
       PASSWORD_RESET_SECRETKEY: string;
       SET_ID_CHARACTERS: string;
       CLIENT_BASE_URL: string;
+      ADMIN_USERNAME: string;
       ADMIN_PASSWORD: string;
+      ADMIN_EMAIL_ADDRESS: string;
     }
   }
 }

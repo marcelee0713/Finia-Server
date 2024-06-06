@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest --runInBand --no-cache --forceExit",
     "build": "npx tsc && npx prisma generate",
+    "db:deploy": "npx prisma migrate deploy",
     "start": "node ./dist/index.js",
     "dev:build": "rimraf dist && npx tsc && npx prisma generate",
     "dev": "nodemon -L ./src/index.ts",
@@ -27,6 +28,7 @@
     "inversify": "^6.0.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.13",
+    "playwright": "^1.44.1",
     "redis": "^4.6.13",
     "reflect-metadata": "^0.2.2",
     "zod": "^3.22.4"
