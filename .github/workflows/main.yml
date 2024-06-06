@@ -3,32 +3,15 @@ name: CI
 on:
   push:
     branches: [master, main]
-    paths:
-      - ./prisma/migrations/**
+
   pull_request:
     branches: [master, main]
-    paths:
-      - ./prisma/migrations/**
+
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/finia-app
 
     steps:
       - name: Checkout code
@@ -50,11 +33,10 @@ jobs:
       - name: Build the project
         run: npm run build:prod
 
-      - name: Print environment variables
-        run: printenv
-
       - name: Run Tests
         run: npm run test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_DEV_URL }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v3
