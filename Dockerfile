@@ -11,7 +11,7 @@ RUN npm ci --quiet --legacy-peer-deps
 
 COPY . .
 
-RUN npm run build
+RUN npm run build:prod
 
 EXPOSE 3001
 
