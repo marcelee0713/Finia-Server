@@ -24,7 +24,9 @@ export class UserMiddlewares {
     try {
       const accessToken = req.cookies.token;
 
-      if (accessToken === undefined) throw new Error("not-authorized" as ErrorType);
+      if (accessToken === undefined || accessToken === "") {
+        throw new Error("not-authorized" as ErrorType);
+      }
 
       const payload = this.jwt.getPayload({
         token: accessToken,
@@ -54,7 +56,15 @@ export class UserMiddlewares {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
 
-        return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+        return res
+          .cookie("token", "", {
+            httpOnly: true,
+            secure: true,
+            maxAge: 0,
+            sameSite: "none",
+          })
+          .status(parseInt(errObj.status))
+          .json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error" });

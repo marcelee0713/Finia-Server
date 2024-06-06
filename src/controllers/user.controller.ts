@@ -80,7 +80,15 @@ export class UserController {
 
       await this.interactor.logOutUser(token);
 
-      return res.clearCookie("token").status(200).json({ res: "Successfully logged out user" });
+      return res
+        .cookie("token", "", {
+          httpOnly: true,
+          secure: true,
+          maxAge: 0,
+          sameSite: "none",
+        })
+        .status(200)
+        .json({ res: "Successfully logged out user" });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -180,7 +188,12 @@ export class UserController {
       await this.interactor.changePassword(uid, newPassword, removeSessions);
 
       return res
-        .clearCookie("token")
+        .cookie("token", "", {
+          httpOnly: true,
+          secure: true,
+          maxAge: 0,
+          sameSite: "none",
+        })
         .status(200)
         .json({ res: "Successfully reset your password!" });
     } catch (err) {
@@ -217,7 +230,15 @@ export class UserController {
         const errObj = handleError(err.message as ErrorType);
 
         if ((errObj.message as ErrorType) === "not-authorized") {
-          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+          return res
+            .cookie("token", "", {
+              httpOnly: true,
+              secure: true,
+              maxAge: 0,
+              sameSite: "none",
+            })
+            .status(parseInt(errObj.status))
+            .json(errObj);
         }
 
         return res.status(parseInt(errObj.status)).json(errObj);
@@ -241,7 +262,15 @@ export class UserController {
         const errObj = handleError(err.message as ErrorType);
 
         if ((errObj.message as ErrorType) === "not-authorized") {
-          return res.clearCookie("token").status(parseInt(errObj.status)).json(errObj);
+          return res
+            .cookie("token", "", {
+              httpOnly: true,
+              secure: true,
+              maxAge: 0,
+              sameSite: "none",
+            })
+            .status(parseInt(errObj.status))
+            .json(errObj);
         }
 
         return res.status(parseInt(errObj.status)).json(errObj);
