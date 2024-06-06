@@ -1,6 +1,9 @@
 import rateLimit from "express-rate-limit";
 
 export const transactionCUDRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 1000,
   limit: 100,
   standardHeaders: true,
@@ -9,6 +12,9 @@ export const transactionCUDRateLimit = rateLimit({
 });
 
 export const transactionReadRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 1000,
   limit: 250,
   standardHeaders: true,

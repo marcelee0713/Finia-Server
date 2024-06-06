@@ -19,6 +19,7 @@ app.use(
   cors({
     origin: [process.env.CLIENT_BASE_URL as string],
     credentials: true,
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 

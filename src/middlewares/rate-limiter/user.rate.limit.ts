@@ -1,6 +1,9 @@
 import rateLimit from "express-rate-limit";
 
 export const emailAndPasswordVerificationRequestRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 1000,
   limit: 2,
   standardHeaders: true,
@@ -9,6 +12,9 @@ export const emailAndPasswordVerificationRequestRateLimit = rateLimit({
 });
 
 export const emailAndPassVerifyingRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 60 * 1000,
   limit: 20,
   standardHeaders: true,
@@ -17,6 +23,9 @@ export const emailAndPassVerifyingRateLimit = rateLimit({
 });
 
 export const loginAndOutRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 1000,
   limit: 10,
   standardHeaders: true,
@@ -25,6 +34,9 @@ export const loginAndOutRateLimit = rateLimit({
 });
 
 export const createAccountRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 3 * 60 * 60 * 1000,
   limit: 20,
   standardHeaders: true,
@@ -33,6 +45,9 @@ export const createAccountRateLimit = rateLimit({
 });
 
 export const passwordModificationRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 60 * 1000,
   limit: 20,
   standardHeaders: true,
@@ -41,6 +56,9 @@ export const passwordModificationRateLimit = rateLimit({
 });
 
 export const getUserDataRateLimit = rateLimit({
+  validate: {
+    validationsConfig: false,
+  },
   windowMs: 60 * 1000,
   limit: 30,
   standardHeaders: true,
