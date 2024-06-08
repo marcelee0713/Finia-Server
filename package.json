@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "A back-end for Finia",
   "main": "index.js",
   "scripts": {
     "build:prod": "npx tsc && npx prisma generate",
@@ -16,7 +16,7 @@
     "lint:check": "eslint ."
   },
   "keywords": [],
-  "author": "",
+  "author": "Marcel Magbual",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.12.1",
