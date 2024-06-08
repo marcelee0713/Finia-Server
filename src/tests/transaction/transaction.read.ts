@@ -30,23 +30,15 @@ export const TransactionReadSuite = () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("token");
 
-    const cookies = response.headers["set-cookie"];
-
-    cookies[0].split(";").map((val) => {
-      if (val.startsWith("token=")) {
-        tokenSession = val.replace("token=", "");
-        return;
-      }
-    });
+    const res: { token: string } = await response.body;
+    tokenSession = res.token;
   });
 
   it(`Should return an error with the type "invalid-transaction-type" and status of 400`, async () => {
     getTransactionBody.type = "NOTATYPE";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(400);
@@ -63,9 +55,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.category = "blabla";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(404);
@@ -79,9 +69,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.dateOrder = "ash";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(400);
@@ -95,9 +83,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.maxAmount = "250";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(400);
@@ -111,9 +97,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.maxAmount = "500.213";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(400);
@@ -132,9 +116,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.take = "hihihi";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     expect(response.status).toBe(400);
@@ -156,9 +138,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.category = "Food";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     const resBody: TransactionData = response.body;
@@ -172,9 +152,7 @@ export const TransactionReadSuite = () => {
     getTransactionBody.category = "Transportation";
 
     const response = await request(app)
-      .post("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions?token=${tokenSession}`)
       .send(getTransactionBody);
 
     const resBody: TransactionData = response.body;
@@ -185,9 +163,7 @@ export const TransactionReadSuite = () => {
 
   it(`Should log out the user`, async () => {
     const response = await request(app)
-      .delete("/api/v1/users/logout")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .delete(`/api/v1/users/logout?token=${tokenSession}`)
       .send({});
 
     expect(response.status).toBe(200);

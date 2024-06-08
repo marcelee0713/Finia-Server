@@ -13,7 +13,6 @@
     "seed": "npx prisma db seed",
     "test": "jest --runInBand --no-cache --forceExit",
     "reset": "rimraf node_modules dist package-lock.json",
-    "build": "npx tsc && npx prisma generate",
     "lint:check": "eslint ."
   },
   "keywords": [],

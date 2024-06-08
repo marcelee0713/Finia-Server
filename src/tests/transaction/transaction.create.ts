@@ -30,21 +30,13 @@ export const TransactionCreateSuite = () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("token");
 
-    const cookies = response.headers["set-cookie"];
-
-    cookies[0].split(";").map((val) => {
-      if (val.startsWith("token=")) {
-        tokenSession = val.replace("token=", "");
-        return;
-      }
-    });
+    const res: { token: string } = await response.body;
+    tokenSession = res.token;
   });
 
   it(`Should return an error with the type "not-authorized" and status of 401`, async () => {
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=`)
       .send(createTransactionBody);
 
     expect(response.status).toBe(401);
@@ -56,9 +48,7 @@ export const TransactionCreateSuite = () => {
   it(`Should return an error with the type "invalid-amount" and status of 400`, async () => {
     createTransactionBody.amount = "1500000HEHE0.000";
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -75,9 +65,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.type = "NOTATYPE";
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -99,9 +87,7 @@ export const TransactionCreateSuite = () => {
         HEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEH`;
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -118,9 +104,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "UNKNOWN";
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.body).toHaveProperty("message", "Category does not exist!");
@@ -135,9 +119,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.date = "JAN2020201";
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.body).toHaveProperty("message", "Date is not valid");
@@ -154,9 +136,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "Food";
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.status).toBe(200);
@@ -170,9 +150,7 @@ export const TransactionCreateSuite = () => {
     createTransactionBody.category = "Food";
 
     const response = await request(app)
-      .post("/api/v1/transactions/create")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .post(`/api/v1/transactions/create?token=${tokenSession}`)
       .send(createTransactionBody);
 
     expect(response.status).toBe(200);
@@ -180,11 +158,7 @@ export const TransactionCreateSuite = () => {
   });
 
   it(`Should log out the user`, async () => {
-    const response = await request(app)
-      .delete("/api/v1/users/logout")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
-      .send({});
+    const response = await request(app).delete(`/api/v1/users/logout?token=${tokenSession}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("res", "Successfully logged out user");

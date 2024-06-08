@@ -40,7 +40,7 @@ export class TransactionRepository implements ITransactionRepository {
           category_id: _category.uid,
           amount: amount,
           type: type,
-          note: note && note,
+          note: note,
           created_at: date ?? new Date(),
         },
       });

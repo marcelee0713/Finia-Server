@@ -130,6 +130,8 @@ export class Transaction implements ITransaction {
     if (!enteredNote) return undefined;
 
     if (enteredNote.length > 50) throw new Error("invalid-note" as ErrorType);
+
+    return enteredNote;
   }
 
   validateDate(enteredDate: string | undefined): Date | undefined {

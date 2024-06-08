@@ -22,7 +22,7 @@ export class UserMiddlewares {
 
   async handleReq(req: Request, res: Response, next: NextFunction) {
     try {
-      const accessToken = req.cookies.token;
+      const accessToken = req.query.token as string;
 
       if (accessToken === undefined || accessToken === "") {
         throw new Error("not-authorized" as ErrorType);
@@ -56,15 +56,7 @@ export class UserMiddlewares {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
 
-        return res
-          .cookie("token", "", {
-            httpOnly: true,
-            secure: true,
-            maxAge: 0,
-            sameSite: "none",
-          })
-          .status(parseInt(errObj.status))
-          .json(errObj);
+        return res.status(parseInt(errObj.status)).json(errObj);
       }
 
       return res.status(500).json({ error: "Internal server error" });

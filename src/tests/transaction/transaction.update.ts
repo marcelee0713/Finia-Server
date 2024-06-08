@@ -31,22 +31,14 @@ export const TransactionUpdateSuite = () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("token");
 
-    const cookies = response.headers["set-cookie"];
-
-    cookies[0].split(";").map((val) => {
-      if (val.startsWith("token=")) {
-        tokenSession = val.replace("token=", "");
-        return;
-      }
-    });
+    const res: { token: string } = await response.body;
+    tokenSession = res.token;
   });
 
   it(`Should return an error with the type "invalid-amount" and status of 400`, async () => {
     patchTransactionBody.amount = "1500000HEHE0.000";
     const response = await request(app)
-      .patch("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .patch(`/api/v1/transactions?token=${tokenSession}`)
       .send(patchTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -63,9 +55,7 @@ export const TransactionUpdateSuite = () => {
     patchTransactionBody.type = "NOTATYPE";
 
     const response = await request(app)
-      .patch("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .patch(`/api/v1/transactions?token=${tokenSession}`)
       .send(patchTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -87,9 +77,7 @@ export const TransactionUpdateSuite = () => {
         HEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEHEH`;
 
     const response = await request(app)
-      .patch("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .patch(`/api/v1/transactions?token=${tokenSession}`)
       .send(patchTransactionBody);
 
     expect(response.body).toHaveProperty(
@@ -106,9 +94,7 @@ export const TransactionUpdateSuite = () => {
     patchTransactionBody.category = "UNKNOWN";
 
     const response = await request(app)
-      .patch("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .patch(`/api/v1/transactions?token=${tokenSession}`)
       .send(patchTransactionBody);
 
     expect(response.body).toHaveProperty("message", "Category does not exist!");
@@ -122,9 +108,7 @@ export const TransactionUpdateSuite = () => {
     patchTransactionBody.amount = "3000.00";
 
     const response = await request(app)
-      .patch("/api/v1/transactions/")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .patch(`/api/v1/transactions?token=${tokenSession}`)
       .send(patchTransactionBody);
 
     expect(response.status).toBe(200);
@@ -133,9 +117,7 @@ export const TransactionUpdateSuite = () => {
 
   it(`Should log out the user`, async () => {
     const response = await request(app)
-      .delete("/api/v1/users/logout")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
+      .delete(`/api/v1/users/logout?token=${tokenSession}`)
       .send({});
 
     expect(response.status).toBe(200);

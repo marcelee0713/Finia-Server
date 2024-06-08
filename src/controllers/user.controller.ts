@@ -52,15 +52,7 @@ export class UserController {
 
       const accessToken = await this.interactor.logInUser(username, password);
 
-      return res
-        .cookie("token", accessToken, {
-          httpOnly: true,
-          secure: true,
-          maxAge: 2592000000,
-          sameSite: "none",
-        })
-        .status(200)
-        .json({ token: accessToken });
+      return res.status(200).json({ token: accessToken });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -80,15 +72,7 @@ export class UserController {
 
       await this.interactor.logOutUser(token);
 
-      return res
-        .cookie("token", "", {
-          httpOnly: true,
-          secure: true,
-          maxAge: 0,
-          sameSite: "none",
-        })
-        .status(200)
-        .json({ res: "Successfully logged out user" });
+      return res.status(200).json({ res: "Successfully logged out user" });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -187,15 +171,7 @@ export class UserController {
 
       await this.interactor.changePassword(uid, newPassword, removeSessions);
 
-      return res
-        .cookie("token", "", {
-          httpOnly: true,
-          secure: true,
-          maxAge: 0,
-          sameSite: "none",
-        })
-        .status(200)
-        .json({ res: "Successfully reset your password!" });
+      return res.status(200).json({ res: "Successfully reset your password!" });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
@@ -216,30 +192,10 @@ export class UserController {
 
       const data = await this.interactor.getUserData(uid);
 
-      return res
-        .cookie("token", token, {
-          httpOnly: true,
-          secure: true,
-          maxAge: 2592000000,
-          sameSite: "none",
-        })
-        .status(200)
-        .json(data);
+      return res.status(200).json({ ...data, token });
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
-
-        if ((errObj.message as ErrorType) === "not-authorized") {
-          return res
-            .cookie("token", "", {
-              httpOnly: true,
-              secure: true,
-              maxAge: 0,
-              sameSite: "none",
-            })
-            .status(parseInt(errObj.status))
-            .json(errObj);
-        }
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }
@@ -260,18 +216,6 @@ export class UserController {
     } catch (err) {
       if (err instanceof Error) {
         const errObj = handleError(err.message as ErrorType);
-
-        if ((errObj.message as ErrorType) === "not-authorized") {
-          return res
-            .cookie("token", "", {
-              httpOnly: true,
-              secure: true,
-              maxAge: 0,
-              sameSite: "none",
-            })
-            .status(parseInt(errObj.status))
-            .json(errObj);
-        }
 
         return res.status(parseInt(errObj.status)).json(errObj);
       }

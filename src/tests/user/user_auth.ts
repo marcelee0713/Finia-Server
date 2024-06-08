@@ -175,7 +175,7 @@ export const UserAuthTestSuite = () => {
   it(`Should return an error with the type "not-authorized" and status of 401`, async () => {
     body.password = "P@ssword12345";
 
-    const response = await request(app).delete("/api/v1/users/logout").set("Cookie", `token=""`);
+    const response = await request(app).delete("/api/v1/users/logout?token=");
 
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("message", "Unauthorized");
@@ -193,24 +193,15 @@ export const UserAuthTestSuite = () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("token");
 
-    const cookies = response.headers["set-cookie"];
+    const res: { token: string } = await response.body;
 
-    cookies[0].split(";").map((val) => {
-      if (val.startsWith("token=")) {
-        tokenSession = val.replace("token=", "");
-        return;
-      }
-    });
+    tokenSession = res.token;
   });
 
   it(`Should log out the user`, async () => {
     body.password = "P@ssword1234";
 
-    const response = await request(app)
-      .delete("/api/v1/users/logout")
-      .set("Cookie", [`token=${tokenSession}`])
-      .set("Content-Type", "application/json")
-      .send({});
+    const response = await request(app).delete(`/api/v1/users/logout?token=${tokenSession}`);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("res", "Successfully logged out user");
